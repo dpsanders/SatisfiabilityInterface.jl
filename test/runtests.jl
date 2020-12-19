@@ -1,6 +1,12 @@
 using SatisfiabilityInterface
 using Test
 
+
+
 @testset "SatisfiabilityInterface.jl" begin
-    # Write your tests here.
+
+    include("graph_colouring.jl")
+    include("sudoku.jl")
+
 end
+
