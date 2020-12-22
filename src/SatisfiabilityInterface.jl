@@ -3,7 +3,9 @@ module SatisfiabilityInterface
 using ModelingToolkit
 
 
-export BoundedInteger, Model, solve, make_vector, read_cnf
+export BoundedInteger, Model, solve
+export make_vector, read_cnf, SATProblem
+export satisfies
 
 # functions to be extend:
 import Base: push!

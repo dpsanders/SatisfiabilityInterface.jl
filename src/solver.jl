@@ -84,3 +84,21 @@ function call_solver(solver; input="_input.cnf", output="_out.txt")
 
     return status, results
 end
+
+
+
+"""
+Check that the clause is satisfied by the assignments 
+in `results`
+"""
+function satisfies(clause::Vector{Int}, results)
+    return any(x -> results[abs(x)] == x, clause)
+end
+
+"""
+Check that all clases in `p` are satisfied by the 
+assignments in `results`
+"""
+function satisfies(p, results)
+    return all(satisfies.(p.clauses, Ref(results)))
+end
