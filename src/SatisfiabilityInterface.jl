@@ -2,9 +2,12 @@ module SatisfiabilityInterface
 
 using ModelingToolkit
 
+
 export BoundedInteger, Model, solve, make_vector, read_cnf
 
+# functions to be extend:
 import Base: push!
+import CommonSolve: solve
 
 include("modeling_toolkit_interface.jl")
 include("bounded_integer.jl")

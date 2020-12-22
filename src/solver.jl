@@ -27,21 +27,51 @@ const SAT_status = Dict(10 => :sat,
                          15 => :unknown,
                          20 => :unsat)
 
-"Use SAT solver to solve"
-function call_solver(; solver="cryptominisat5", input="_input.cnf", output="_out.txt")
 
-    # if solver == "cryptominisat5" && options == ""
-    #     options = "--verb=0"  # remove verbose output
-    # end
+function solve(p::SATProblem; solver=cryptominisat)
+    s = dimacs_output(p)
+
+    input = "_input.cnf"
+    write(input, s)
+
+    return @time call_solver(solver, input=input)
+end
+
+abstract type AbstractSATSolver end
+
+"""
+Object representing an external SAT solver binary (executable).
+
+- `name`: Name of the executable
+- `options`: Options to pass in
+- `status`: Dictionary containing exit codes and their interpretation
+"""
+struct ExternalSATSolver <: AbstractSATSolver
+    name::String 
+    options::String
+    status::Dict{Int, Symbol}
+end
+
+const cryptominisat = 
+    ExternalSATSolver("cryptominisat5", "", 
+                Dict(10 => :sat,
+                     15 => :unknown,
+                     20 => :unsat) )
+
+"""
+Call a solver executable (binary) that takes `.cnf` input.
+The solver's standard output is captured to a file.
+"""
+function call_solver(solver; input="_input.cnf", output="_out.txt")
 
     # run the solver:
-    cmd = `$solver $input`
-    # @show cmd
+    cmd = `$(solver.name) $input`
+    
     pipe = pipeline(cmd, stdout=output)
     out = run(pipe, wait=false);
     wait(out)
 
-    status = SAT_status[out.exitcode]
+    status = solver.status[out.exitcode]
 
     status ∈ (:unsat, :unknown) && return status, Int[]
 
@@ -53,14 +83,4 @@ function call_solver(; solver="cryptominisat5", input="_input.cnf", output="_out
     pop!(results)  # remove final 0
 
     return status, results
-end
-
-
-function solve(p::SATProblem)
-    s = dimacs_output(p)
-
-    input = "_input.cnf"
-    write(input, s)
-
-    return @time call_solver(input=input)
 end
