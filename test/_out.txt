@@ -15,7 +15,7 @@ c -- vars added 729
 c Parsing time: 0.00 s
 c   type VSIDS  rest  conf freevar  IrrL  IrrB l/longC  l/allC RedL0 RedL1 RedL2  RedB l/longC  l/allC
 c ------- FINAL TOTAL SEARCH STATS ---------
-c UIP search time          : 0.00        (0.54      % time)
+c UIP search time          : 0.00        (0.52      % time)
 c restarts                 : 1           (0.00      confls per restart)
 c blocked restarts         : 0           (0.00      per normal restart)
 c time                     : 0.00        
