@@ -2,7 +2,7 @@ module SatisfiabilityInterface
 
 using ModelingToolkit
 
-export BoundedInteger, Model, solve, make_vector
+export BoundedInteger, Model, solve, make_vector, read_cnf
 
 import Base: push!
 
@@ -14,5 +14,6 @@ include("sat_problem.jl")
 include("solver.jl")
 include("symbolic_problem.jl")
 include("MOI_wrapper.jl")
+include("read_cnf.jl")
 
 end
