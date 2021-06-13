@@ -1,92 +1,25 @@
-using Revise, Symbolics
-using Symbolics: Sym
 
-include("modeling_toolkit_interface.jl")
+include("discrete_variables.jl")
 
-abstract type Var end   # variable
-
-# struct Boolean 
-#     name::Symbol
-# end
-
-# OR(x::Boolean, y::Boolean) = 
-
-struct Integ <: Var
-    name::Symbol
-    domain::Vector{Int}
-    booleans::Vector{Sym{Real}}
-    varmap::Dict{Int, Sym{Real}}  # forward dictionary from domain to variables
-end
-
-Base.show(io::IO, x::Integ) = print(io, x.name)
-
-
-function Integ(name, domain)
-    domain2 = collect(domain)
-    booleans = [Variable(name, i) for i ∈ domain2]
-
-    varmap = Dict(i => v for (i, v) in zip(domain2, booleans))
-
-    return Integ(name, domain2, booleans, varmap)
-end
-
-
-not_both(x, y) = ¬x ∨ ¬y
-implies(x, y) = ¬x ∨ y
-
-# TODO: areunique function
-
-function clauses(x::Integ)
-    vars = x.booleans
-
-    # cs = [∨(vars...)]  # one must be true
-    cs = [∨(vars)]
-
-    for i in 1:length(vars)
-        for j in i+1:length(vars)
-            push!(cs, not_both(vars[i], vars[j]))  # not both are true 
-        end
-    end
-
-    return cs
-
-end
-
-x = Integ(:x, 1:4)
-y = Integ(:y, 2:6)
-
-clauses(y)
-
-y.booleans
-
-
-domain(x::Integ) = x.domain
-vars(x::Integ) = [x]
-
-vars(x::Int) = []
-
-domain(x)
-
-vars(x)
-
+"Node in a syntax tree"
 struct Node{op}
     lhs
     rhs
-    l_vars  # vars in the left child 
-    r_vars
+    lhs_vars  # vars in the left child 
+    rhs_vars
 end
 
-vars(n::Node) = n.l_vars ∪ n.r_vars
+vars(n::Node) = n.lhs_vars ∪ n.rhs_vars
 Node{op}(x, y) where {op} = Node{op}(x, y, vars(x), vars(y))
 
 import Base: +, ≠, ~
 
-≠(x::Integ, y::Integ) = Node{≠}(x, y)
-~(x::Integ, y::Integ) = Node{~}(x, y)
+≠(x::DiscreteVariable, y::DiscreteVariable) = Node{≠}(x, y)
+~(x::DiscreteVariable, y::DiscreteVariable) = Node{~}(x, y)
 
-+(x::Integ, y::Integ) = Node{+}(x, y)
-+(x::Integ, y::Node) = Node{+}(x, y)
-+(x::Node, y::Integ) = Node{+}(x, y)
++(x::DiscreteVariable, y::DiscreteVariable) = Node{+}(x, y)
++(x::DiscreteVariable, y::Node) = Node{+}(x, y)
++(x::Node, y::DiscreteVariable) = Node{+}(x, y)
 +(x::Node, y::Node) = Node{+}(x, y)
 
 ~(x, y) = Node{~}(x, y)
@@ -96,21 +29,21 @@ vars(x ≠ y)
 
 function clauses(n::Node{!=})
     # assuming single variables on each side
-    cs = []
+    clauses = []
 
     x = n.lhs
     y = n.rhs
 
     for i in domain(x)
         for j in domain(y)
-            @show i, j
+            # @show i, j
             if i == j 
-                push!(cs, not_both(x.varmap[i], y.varmap[j]))
+                push!(clauses, not_both(x.varmap[i], y.varmap[j]))
             end
         end
     end
 
-    return cs
+    return clauses
 end
 
 
@@ -135,7 +68,7 @@ function evaluate(z::Node{op}, x) where {op}  # evaluate z at x
     return op(evaluate(z.lhs, first(x)), evaluate(z.rhs, last(x)))
 end
 
-evaluate(z::Integ, x) = x
+evaluate(z::DiscreteVariable, x) = x
 evaluate(z::Int, x) = z
 
 z = x + y
@@ -147,7 +80,7 @@ first(domain(z))
 evaluate.(Ref(z), domain(z))
 
 
-boolean(x::Integ, v::Int) = x.varmap[v]
+boolean(x::DiscreteVariable, v::Int) = x.varmap[v]
 
 domain(x::Int) = [x]
 
@@ -230,7 +163,7 @@ function clauses(n::Node{~})
 
 end
 
-z = Integ(:z, 3:5)
+z = DiscreteVariable(:z, 3:5)
 
 n = x + y ~ z
 
@@ -287,10 +220,10 @@ xl = @beebool x[1:4]
 @constrain sum([-xl[1], xl[2], -xl[3], xl[4]]) == w
 =#
 
-x = Integ(:x, 0:5)
-y = Integ(:y, -4:9)
-z = Integ(:z, -5:10)
-w = Integ(:w, 0:10)
+x = DiscreteVariable(:x, 0:5)
+y = DiscreteVariable(:y, -4:9)
+z = DiscreteVariable(:z, -5:10)
+w = DiscreteVariable(:w, 0:10)
 
 constraints = [
     x + y ~ z
