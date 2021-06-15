@@ -1,12 +1,4 @@
-
-
-"Index mapping variables to integers"
-struct IndexDict
-    index::Dict{Sym, Int}
-end
-
-IndexDict(vars::Vector{<:Sym}) = IndexDict(Dict(v => i for (i, v) in enumerate(vars)))
-
+include("constraints.jl")
 
 
 struct Model
@@ -16,8 +8,8 @@ end
 
 Model() = Model([], [])
 
-push!(m::Model, var) = push!(m.variables, var)
-push!(m::Model, c::Constraint) = push!(m.constraints, c)
+# Base.push!(m::Model, var) = push!(m.variables, var)
+# Base.push!(m::Model, c::Constraint) = push!(m.constraints, c)
 
 function clauses(m::Model)
     variable_clauses = reduce(∪, clauses.(m.variables))
@@ -27,7 +19,8 @@ function clauses(m::Model)
 end
 
 variables(m::Model) = m.variables
-boolean_variables(m::Model) = reduce(vcat, (v.vars for v in variables(m)))
+# boolean_variables(m::Model) = reduce(vcat, (v.vars for v in variables(m)))
+boolean_variables(m::Model) = reduce(vcat, (v.booleans for v in variables(m)))
 
 
 

@@ -102,3 +102,4 @@ assignments in `results`
 function satisfies(p, results)
     return all(satisfies.(p.clauses, Ref(results)))
 end
+

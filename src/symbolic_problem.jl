@@ -1,3 +1,12 @@
+using Symbolics: Term
+
+"Index mapping variables to integers"
+struct IndexDict
+    index::Dict{Sym, Int}
+end
+
+IndexDict(vars::Vector{<:Sym}) = IndexDict(Dict(v => i for (i, v) in enumerate(vars)))
+
 
 
 struct SymbolicSATProblem 
@@ -10,7 +19,7 @@ end
 
 function process(d::IndexDict, var::Sym)
     if !haskey(d.index, var)
-        error("$c is not in the problem")
+        error("$var is not in the problem")
     end
 
     return [ d.index[var] ]
