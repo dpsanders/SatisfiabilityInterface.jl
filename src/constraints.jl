@@ -27,16 +27,16 @@ function clauses(c::Constraint{~})
     [c.lhs[i]]  # that Boolean is positive
 end
 
-Base.:≠(x::BoundedInteger, y::BoundedInteger) = Constraint{≠}(x, y)
-Base.:~(x::BoundedInteger, y::Int) = Constraint{~}(x, y)
+# Base.:≠(x::BoundedInteger, y::BoundedInteger) = Constraint{≠}(x, y)
+# Base.:~(x::BoundedInteger, y::Int) = Constraint{~}(x, y)
 
 
 
-macro integer(name, k)
-    quoted = Meta.quot(name)
+# macro integer(name, k)
+#     quoted = Meta.quot(name)
 
-    :($(esc(name)) = BoundedInteger{$k}($quoted))
-end
+#     :($(esc(name)) = BoundedInteger{$k}($quoted))
+# end
 
 
 make_vector(name, T, num) = [T(Symbol(name, subscript(i))) for i in 1:num]
