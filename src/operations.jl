@@ -134,31 +134,6 @@ So if x_i and y_j then z must have value i+j
 =#
 
 
-
-#= 
-Example from BeeEncoder.jl:
-
-@beeint x  0 5
-@beeint y -4 9
-@beeint z -5 10
-
-@constrain x + y == z
-
-@beeint w 0 10
-
-xl = @beebool x[1:4]
-
-@constrain xl[1] == -xl[2]
-@constrain xl[2] == true
-
-@constrain sum([-xl[1], xl[2], -xl[3], xl[4]]) == w
-=#
-
-x = DiscreteVariable(:x, 0:5)
-y = DiscreteVariable(:y, -4:9)
-z = DiscreteVariable(:z, -5:10)
-w = DiscreteVariable(:w, 0:10)
-
 # constraints = [
 #     x + y ~ z
 # ]
@@ -200,15 +175,6 @@ w = DiscreteVariable(:w, 0:10)
 #     return z_variable
 # end
 
-"Find the domain of op(x, y), assuming that x and y have *finite* domains.
-We could (possibly / partially?) relax this using interval arithmetic.
-"
-
-# function find_domain(op, x, y)
-#     @show op, x, y
-#     s = Set(op(i, j) for i ∈ domain(x), j ∈ domain(y))
-#     return sort(collect(s))
-# end
 
 find_domain(domains, op, x, y) = op(domains[x], domains[y])
 
@@ -216,8 +182,8 @@ find_domain(domains, op, x, y) = op(domains[x], domains[y])
     #     return sort(collect(s))
     # end
 
-x = DiscreteVariable(:x, 0:5)
-y = DiscreteVariable(:y, -4:9)
+# x = DiscreteVariable(:x, 0:5)
+# y = DiscreteVariable(:y, -4:9)
 
 using IntervalArithmetic
 
@@ -261,10 +227,6 @@ intervalise(domain) = interval(extrema(domain)...)
 
 # process(ex)
 
-
-x = DiscreteVariable(:x, 1:2)
-y = DiscreteVariable(:y, 3:5)
-
 # z = OperationVariable(:z, +, x, y)
 
 # z = make_variable(:z, +, x, y
@@ -277,14 +239,14 @@ y = DiscreteVariable(:y, 3:5)
 Contradiction between treating x + y as purely symbolic, and as referring to actual variables
 =#
 
-@variables x, y, z 
+# @variables x, y, z 
 
-constraints = [
-    x ∈ 1:4
-    y ∈ 2:5
-    z == x + y
-    z ≤ 4
-]
+# constraints = [
+#     x ∈ 1:4
+#     y ∈ 2:5
+#     z == x + y
+#     z ≤ 4
+# ]
 
 #=
 The constraint z == x + y feels different, since it introduces a new variable.
@@ -299,7 +261,7 @@ But we should not have x = DiscreteVariable(...)
 
 =#
 
-x ∈ 1:4
+# x ∈ 1:4
 
 
 
@@ -322,7 +284,7 @@ function parse_constraint!(domains, ex::Num)
 
     binary_constraint = false
 
-    if op == ∈
+    if op == ∈   # assumes right-hand side is an explicit set
         var = lhs
         domain = rhs 
 
@@ -355,26 +317,16 @@ function parse_constraint!(domains, ex::Num)
 end
 
 
-
-@variables x, y, z
-domains = Dict(value(x) => -Inf..Inf, value(y) => -Inf..Inf, value(z) => -Inf..Inf)
-
-parse_constraint!(domains, x ∈ 1:2)
-parse_constraint!(domains, y ∈ 2:5)
-domains[x]
-
-parse_constraint!(domains, z == x + y)
-parse_constraint!(domains, z ≤ 4)
-parse_constraint!(domains, z ≤ 3)
-
-domain(x::Sym) = domains[x]
-
 #=
 Once we have parsed all the constraints, we are ready to create the true 
 ConstraintSatisfactionProblem
 =#
 
-
+## TODO
+# Handle unary constraints like z <= x 
+# Handle z == 2
+# Handle x + y == 2   
+# Handle x + y <= 4   (probably add a new variable z = x + y)
 
 function parse_constraints(vars, constraints)
     domains = Dict(var => -Inf..Inf for var in vars)
@@ -391,7 +343,7 @@ function parse_constraints(vars, constraints)
 end
 
 
-varss = @variables x, y, z 
+vars = @variables x, y, z 
 
 constraints = [
     x ∈ 1:4
@@ -400,7 +352,7 @@ constraints = [
     z ≤ 4
 ]
 
-domains, binary_constraints = parse_constraints(varss, constraints)
+domains, binary_constraints = parse_constraints(vars, constraints)
 
 domains
 binary_constraints
@@ -415,7 +367,7 @@ struct ConstraintSatisfactionProblem
 end
 
 function ConstraintSatisfactionProblem(vars, constraints)
-    domains, binary_constraints = parse_constraints(varss, constraints)
+    domains, binary_constraints = parse_constraints(vars, constraints)
 
     return ConstraintSatisfactionProblem(vars, domains, binary_constraints, Dict())
 end
