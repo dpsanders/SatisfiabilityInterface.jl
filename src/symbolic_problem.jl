@@ -62,7 +62,7 @@ function SymbolicSATProblem(variables::Vector{<:Sym}, symbolic_clauses)
     return SymbolicSATProblem(variables, symbolic_clauses, d, p)
 end
 
-SymbolicSATProblem(m::Model) = SymbolicSATProblem(boolean_variables(m), clauses(m))
+# SymbolicSATProblem(m::Model) = SymbolicSATProblem(boolean_variables(m), clauses(m))
 
 
 

@@ -9,14 +9,8 @@ should become some kind of Constraint(+, z, x, y) object, where z, x and y now r
 =#
 
 
-include("discrete_variables.jl")
-include("operations.jl")
-include("sat_problem.jl")
-include("model.jl")
-include("symbolic_problem.jl")
-include("solver.jl")
 
-struct LinearEncoder end
+# struct LinearEncoder end
 
 struct BoundedIntegerCSP
     variables 
@@ -27,6 +21,8 @@ end
 # varmap gives the translation from strictly symbolic objects to actual Julia objects
 
 get_bounds(x::Interval) = ceil(Int, x.lo):floor(Int, x.hi)
+
+BoundedIntegerCSP(variables, constraints) = BoundedIntegerCSP(ConstraintSatisfactionProblem(variables, constraints))
 
 function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
     variables = []
@@ -65,7 +61,8 @@ function clauses(op, z, x, y)
 
             if k ∈ domain(z)   # allowed values 
                 push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]) ∨ z.varmap[k])
-            else
+
+            else  # (x=i, y=j) is not possible since it violates the constraint
                 push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]))
             end
         end
@@ -75,7 +72,6 @@ function clauses(op, z, x, y)
 end
 
 
-# clauses(varmap, constraint::Num) = encode(constraint)
 
 function encode(varmap, constraint)
     constraint2 = value(constraint)
@@ -99,7 +95,7 @@ function encode(prob::BoundedIntegerCSP)
     all_variables = []
     all_clauses = []
 
-    domains = Dict(v.name => v.domain for v in prob2.variables)
+    domains = Dict(v.name => v.domain for v in prob.variables)
 
     for var in prob.variables 
         append!(all_variables, var.booleans)
@@ -132,7 +128,7 @@ constraints = [
 prob = ConstraintSatisfactionProblem(vars, constraints)
 prob2 = BoundedIntegerCSP(prob)
 
-domain(prob2.variables[3])
+# domain(prob2.variables[3])
 
 prob3 = encode(prob2)
 
@@ -143,9 +139,6 @@ prob2.varmap[z].booleans
 solve(prob3)
 
 solve(prob3)
-
-m = Model(prob2.variables, prob2.constraints)
-solve(m)
 
 
 
@@ -162,3 +155,22 @@ encode(prob2)
 
 
 show(prob3.clauses)
+
+
+function solve(m::BoundedIntegerCSP)
+    p = encode(m)
+
+    status, result_dict = solve(p)
+
+    (status == :unsat) && return status, missing
+
+    return status, Dict(v => decode(result_dict, v) for v in m.variables)
+end
+
+
+solve(prob2)
+
+
+
+###
+

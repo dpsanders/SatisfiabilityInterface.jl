@@ -78,5 +78,5 @@ function decode(var_dict, x::DiscreteVariable)
         error("Variable $x has not been successfully solved: values $(x.vars .=> values)")
     end
 
-    return findfirst(values)
+    return x.domain[findfirst(values)]
 end
