@@ -1,6 +1,4 @@
-using Symbolics: Assignment, get_variables, operation, arguments, value
 
-include("discrete_variables.jl")
 
 #= 
 High-level idea: 
@@ -175,19 +173,16 @@ So if x_i and y_j then z must have value i+j
 #     return z_variable
 # end
 
+find_domain(domains, op, x, y) = Set([op(i, j) for i in domains[x] for j in domains[y]])
 
-find_domain(domains, op, x, y) = op(domains[x], domains[y])
 
-    #     s = Set(op(i, j) for i ∈ domain(x), j ∈ domain(y))
-    #     return sort(collect(s))
-    # end
+# IntervalArithmetic version:
+# find_domain(domains, op, x, y) = op(domains[x], domains[y]) 
 
-# x = DiscreteVariable(:x, 0:5)
-# y = DiscreteVariable(:y, -4:9)
+ 
+# using IntervalArithmetic
 
-using IntervalArithmetic
-
-intervalise(domain) = interval(extrema(domain)...)
+# intervalise(domain) = interval(extrema(domain)...)
 
 # X = intervalise(domain(x))
 # Y = intervalise(domain(y))
@@ -270,11 +265,12 @@ Start off with domains as -Inf..Inf
 =#
 
 
-Base.intersect(x::Interval, y::UnitRange) = x ∩ interval(extrema(y)...)
+# Base.intersect(x::Interval, y::UnitRange) = x ∩ interval(extrema(y)...)
 
 
 
-function parse_constraint!(domains, ex::Num)
+function parse_constraint!(domains, ex)
+
     expr = value(ex)
     op = operation(expr)
 
@@ -282,37 +278,39 @@ function parse_constraint!(domains, ex::Num)
     lhs = args[1]
     rhs = args[2]
 
-    binary_constraint = false
+    # some constraints just specify domains; exclude these
+    relational_constraint = true
 
-    if op == ∈   # assumes right-hand side is an explicit set
+    if op == ∈   # assumes right-hand side is an explicit set specifying the doomain
         var = lhs
         domain = rhs 
 
-        @show var
-        @show domain
+        # @show var
+        # @show domain
 
-        domains[var] = domains[var] ∩ domain
+        # domains[var] = domains[var] ∩ domain
+        domains[var] = domain
+        relational_constraint = false
     
     elseif (op == ==) || (op == ~)
         var = lhs 
         op = operation(rhs)
         variables = arguments(rhs)
 
-        @show op, 
-        @show variables, typeof(variables)
+        # @show op, 
+        # @show variables, typeof(variables)
 
         domains[var] = find_domain(domains, op, variables...)
-
-        binary_constraint = true
     
-    elseif (op == <) || (op == ≤)
-        domains[lhs] = domains[lhs] ∩ interval(-Inf, rhs)
+    # elseif (op == <) || (op == ≤)
+    #     domains[lhs] = domains[lhs] ∩ interval(-Inf, rhs)
 
-    elseif (op == >) || (op == ≥)
-        domains[lhs] = domains[lhs] ∩ interval(rhs, Inf)
+    # elseif (op == >) || (op == ≥)
+    #     domains[lhs] = domains[lhs] ∩ interval(rhs, Inf)
+    
     end
 
-    return domains, binary_constraint
+    return domains, relational_constraint
 
 end
 
@@ -329,33 +327,19 @@ ConstraintSatisfactionProblem
 # Handle x + y <= 4   (probably add a new variable z = x + y)
 
 function parse_constraints(vars, constraints)
-    domains = Dict(var => -Inf..Inf for var in vars)
-    binary_constraints = []
+    # domains = Dict(var => -Inf..Inf for var in vars)
+    domains = Dict()
+    relational_constraints = []  # excluding domain constraints
 
     for constraint in constraints 
-        domains, is_binary = parse_constraint!(domains, constraint)
-        if is_binary
-            push!(binary_constraints, constraint)
+        domains, is_relation = parse_constraint!(domains, value(constraint))
+        if is_relation
+            push!(relational_constraints, constraint)
         end
     end
 
-    return domains, binary_constraints
+    return domains, relational_constraints
 end
-
-
-vars = @variables x, y, z 
-
-constraints = [
-    x ∈ 1:4
-    y ∈ 2:5
-    z == x + y
-    z ≤ 4
-]
-
-domains, binary_constraints = parse_constraints(vars, constraints)
-
-domains
-binary_constraints
 
 
 
@@ -373,22 +357,8 @@ function ConstraintSatisfactionProblem(vars, constraints)
 end
 
 
-varss = @variables x, y, z 
 
-constraints = [
-    x ∈ 1:2
-    y ∈ 2:5
-    z == x + y
-    z ≤ 4
-]
-
-prob = ConstraintSatisfactionProblem(varss, constraints)
-
-prob.vars
-prob.domains
-prob.constraints
-
-#= I've lost the information that the domains are discrete!
+#= We've lost the information that the domains are discrete!
 
 Make domain_bounds be intervals, and domain_type record whether real or integer
 =#

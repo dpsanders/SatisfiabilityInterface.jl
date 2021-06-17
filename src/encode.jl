@@ -20,7 +20,7 @@ end
 
 # varmap gives the translation from strictly symbolic objects to actual Julia objects
 
-get_bounds(x::Interval) = ceil(Int, x.lo):floor(Int, x.hi)
+# get_bounds(x::Interval) = ceil(Int, x.lo):floor(Int, x.hi)
 
 BoundedIntegerCSP(variables, constraints) = BoundedIntegerCSP(ConstraintSatisfactionProblem(variables, constraints))
 
@@ -29,7 +29,7 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
     varmap = Dict()
 
     for var in prob.vars 
-        variable = DiscreteVariable(var, get_bounds(prob.domains[var]))
+        variable = DiscreteVariable(var, prob.domains[var])
         push!(variables, variable)
         push!(varmap, var => variable)
     end
@@ -39,7 +39,6 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
     return BoundedIntegerCSP(variables, constraints, varmap)
 end
 
-domain(x::DiscreteVariable) = x.domain
 
 "Generate clauses for expression z = op(x, y)
 E.g. encode z = x + y as 
@@ -47,22 +46,21 @@ E.g. encode z = x + y as
 (x == i) && (y == j) => z == i + j
 
 Call this x_i && y_j => z_{i+j}
-
 "
-
-function clauses(op, z, x, y)
+function clauses(::typeof(==), z, op2, x, y)   # e.g. z = x + y
 
     clauses = []
 
     for i in domain(x)
         for j in domain(y)
+            
+            k = op2(i, j)
 
-            k = op(i, j)
-
-            if k ∈ domain(z)   # allowed values 
+            if k ∈ domain(z)
+                # if x and y take those values then z must take value k
                 push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]) ∨ z.varmap[k])
 
-            else  # (x=i, y=j) is not possible since it violates the constraint
+            else  # combination not allowed
                 push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]))
             end
         end
@@ -72,20 +70,84 @@ function clauses(op, z, x, y)
 end
 
 
+"Encode e.g. z <= x + y by banning combinations that don't work"
+function clauses(op1, z, op2, x, y)
 
+    clauses = []
+
+    for i in domain(x)
+        for j in domain(y)
+            for k in domain(z)
+
+                # translation of symbolic constraint into values
+                if !( op1(k, op2(i, j)) )  
+                    # combination is not allowed
+
+                    push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]) ∨ ¬(z.varmap[k]))
+                end
+            end
+        end
+    end
+
+    return clauses
+end
+
+"Assumes that op is a relation like <= or !="
+function clauses(rel, z, x)
+    # @show rel, z, x
+    clauses = []
+
+    for i in domain(x)
+        for j in domain(z)
+
+            if !rel(i, j)
+                push!(clauses, ¬(x.varmap[i]) ∨ ¬(z.varmap[j])) 
+            end
+        end
+    end
+
+    return clauses
+end
+
+
+"Assumes constraint is a binary or ternary relation"
 function encode(varmap, constraint)
+
+    # @show varmap, constraint
+
     constraint2 = value(constraint)
+    op1 = operation(constraint2)
+    args1 = arguments(constraint2)
+    
+    @show op1, args1
+
+    z = args1[1]
+    rhs = args1[2] 
+
+    @show rhs
+    
+    if istree(rhs) && !(operation(rhs) == getindex)
+        # something like z <= x + y
+        op2 = operation(rhs)
+
+        args2 = arguments(rhs)
+        x, y = args2
+
+        @show op2, x, y
+        return clauses(op1, varmap[z], op2, varmap[x], varmap[y])
+    
+    else      # something like z ≠ x
+        x = rhs
+
+        return clauses(op1, varmap[z], varmap[x])
+    end
 
 
-    args = arguments(constraint2)
-    z = args[1]
-    op = operation(args[2])
-    x, y = arguments(args[2])
 
-    @show op, z, x, y
+    # @show op, z, x, y
 
 
-    return clauses(op, varmap[z], varmap[x], varmap[y])
+    
 
 end
 
@@ -102,75 +164,28 @@ function encode(prob::BoundedIntegerCSP)
         append!(all_clauses, clauses(var))
     end
 
+    # @show prob.constraints
+
     for constraint in prob.constraints 
+        @show constraint
         append!(all_clauses, encode(prob.varmap, value(constraint)))
     end
 
-    @show all_variables 
-    @show all_clauses 
+    # @show all_variables 
+    # @show all_clauses 
 
     return SymbolicSATProblem(identity.(all_variables), identity.(all_clauses))
 end
 
 
-#### Example
+function solve(prob::BoundedIntegerCSP)
+    sat_problem = encode(prob)
 
-
-vars = @variables x, y, z 
-
-constraints = [
-    x ∈ 1:2
-    y ∈ 2:5
-    z == x + y
-    z ≤ 3
-]
-
-prob = ConstraintSatisfactionProblem(vars, constraints)
-prob2 = BoundedIntegerCSP(prob)
-
-# domain(prob2.variables[3])
-
-prob3 = encode(prob2)
-
-
-
-prob2.varmap[z].booleans
-
-solve(prob3)
-
-solve(prob3)
-
-
-
-domains = Dict(v.name => v.domain for v in prob2.variables)
-varmap = prob2.varmap
-
-encode(varmap, prob2.constraints[1])
-
-dump(varmap, maxdepth=1)
-
-
-
-encode(prob2)
-
-
-show(prob3.clauses)
-
-
-function solve(m::BoundedIntegerCSP)
-    p = encode(m)
-
-    status, result_dict = solve(p)
+    status, result_dict = solve(sat_problem)
 
     (status == :unsat) && return status, missing
 
-    return status, Dict(v => decode(result_dict, v) for v in m.variables)
+    return status, Dict(v => decode(result_dict, v) for v in prob.variables)
 end
 
-
-solve(prob2)
-
-
-
-###
 
