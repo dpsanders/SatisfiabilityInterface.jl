@@ -1,7 +1,3 @@
-using Symbolics
-using Symbolics: Variable, Sym
-
-include("symbolics_interface.jl")
 
 
 abstract type Var end   # variable
@@ -13,7 +9,7 @@ struct DiscreteVariable{N,D,B,M} <: Var
     varmap::M  # forward dictionary from domain to variables
 end
 
-Base.show(io::IO, x::DiscreteVariable) = print(io, x.name)
+Base.show(io::IO, x::DiscreteVariable) = print(io, "Variable $(x.name) ∈ $(x.domain)")
 
 
 DiscreteVariable(name, D) = DiscreteVariable(name, sort(collect(D)))
@@ -54,18 +50,6 @@ clauses(x::DiscreteVariable) = exactly_one(x.booleans)
 
 domain(x::DiscreteVariable) = x.domain
 # vars(x::DiscreteVariable) = [x]
-
-
-colours = [:red, :yellow, :blue]
-
-x = DiscreteVariable(:x, colours)
-y = DiscreteVariable(:y, 2:4)
-
-clauses(x)
-clauses(y)
-
-domain(x)
-# vars(x)
 
 
 
