@@ -60,6 +60,9 @@ Base.:*(x::Var, y) = NodeVariable(*, x, y)
 Base.:*(x, y::Var) = NodeVariable(*, x, y)
 
 
+Base.:^(x::Var, y) = NodeVariable(^, x, y)
+Base.:^(x, y::Var) = NodeVariable(^, x, y)
+
 function clauses(var::NodeVariable)
 
     op = var.op
@@ -734,6 +737,18 @@ constraints = [
     x ∈ 0:5
     y ∈ -4:9
     x == -2y
+    # sum(b) == w
+
+]
+
+prob = BoundedIntegerCSP(constraints) 
+all_solutions(prob)
+
+
+constraints = [
+    x ∈ -5:5
+    y ∈ -4:9
+    x == -y^2
     # sum(b) == w
 
 ]
