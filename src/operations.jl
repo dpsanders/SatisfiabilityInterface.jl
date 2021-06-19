@@ -175,6 +175,8 @@ So if x_i and y_j then z must have value i+j
 
 find_domain(domains, op, x, y) = Set([op(i, j) for i in domains[x] for j in domains[y]])
 
+find_domain(op, x, y) = Set([op(i, j) for i in domain(x) for j in domain(y)])
+
 
 # IntervalArithmetic version:
 # find_domain(domains, op, x, y) = op(domains[x], domains[y]) 
@@ -292,15 +294,15 @@ function parse_constraint!(domains, ex)
         domains[var] = domain
         relational_constraint = false
     
-    elseif (op == ==) || (op == ~)
-        var = lhs 
-        op = operation(rhs)
-        variables = arguments(rhs)
+    # elseif (op == ==) || (op == ~)
+    #     var = lhs 
+    #     op = operation(rhs)
+    #     variables = arguments(rhs)
 
-        # @show op, 
-        # @show variables, typeof(variables)
+    #     # @show op, 
+    #     # @show variables, typeof(variables)
 
-        domains[var] = find_domain(domains, op, variables...)
+    #     domains[var] = find_domain(domains, op, variables...)
     
     # elseif (op == <) || (op == ≤)
     #     domains[lhs] = domains[lhs] ∩ interval(-Inf, rhs)
@@ -351,6 +353,17 @@ struct ConstraintSatisfactionProblem
 end
 
 function ConstraintSatisfactionProblem(vars, constraints)
+
+    # flatten constraints:
+
+    # while true 
+    #     new_constraints = Iterators.flatten(constraints)
+    #     if new_constraints == constraints 
+    #         break 
+    #     end
+    # end
+
+
     domains, binary_constraints = parse_constraints(vars, constraints)
 
     return ConstraintSatisfactionProblem(vars, domains, binary_constraints, Dict())

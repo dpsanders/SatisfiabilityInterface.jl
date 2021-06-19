@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 CommonSolve = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+ReversePropagation = "527681c1-8309-4d3f-8790-caf822a419ba"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]

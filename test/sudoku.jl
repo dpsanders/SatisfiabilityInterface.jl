@@ -18,18 +18,13 @@ using SatisfiabilityInterface: subscript
     n = 9
     M = make_matrix(:M, n, n)
 
-
     constraints = [ 
         [all_different(M[:, i]) for i in 1:n];
         [all_different(M[i, :]) for i in 1:n];
 
     ] |> Iterators.flatten
 
-    for i in 1:n
-        append!(m.constraints, all_different(M[:, i]))  # columns
-        append!(m.constraints, all_different(M[i, :]))  # rows
-    end
-
+   
     # blocks:
     for i in 0:2, j in 0:2
         append!(m.constraints, all_different(M[3i+1:3i+3, 3j+1:3j+3]))

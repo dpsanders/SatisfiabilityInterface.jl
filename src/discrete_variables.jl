@@ -9,7 +9,8 @@ struct DiscreteVariable{N,D,B,M} <: Var
     varmap::M  # forward dictionary from domain to variables
 end
 
-Base.show(io::IO, x::DiscreteVariable) = print(io, "Variable $(x.name) ∈ $(x.domain)")
+# Base.show(io::IO, x::DiscreteVariable) = print(io, "Variable $(x.name) ∈ $(x.domain)")
+Base.show(io::IO, x::DiscreteVariable) = print(io, "variable $(x.name)")
 
 
 DiscreteVariable(name, D) = DiscreteVariable(name, sort(collect(D)))
@@ -48,13 +49,13 @@ end
 clauses(x::DiscreteVariable) = exactly_one(x.booleans)
    
 
-domain(x::DiscreteVariable) = x.domain
+domain(x::Var) = x.domain
 # vars(x::DiscreteVariable) = [x]
 
 
 
-function decode(var_dict, x::DiscreteVariable)
-    values = [var_dict[v] for v in x.booleans]
+function decode(varmap, x::Var)
+    values = [varmap[v] for v in x.booleans]
 
     num_true = count(values)
 

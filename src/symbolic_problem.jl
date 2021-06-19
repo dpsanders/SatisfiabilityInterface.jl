@@ -78,3 +78,7 @@ function solve(p::SymbolicSATProblem)
     return status, decode(p.variables, results)
 
 end
+
+decode(p::SymbolicSATProblem, results::Vector{Int}) = decode(p.variables, results)
+
+all_solutions(p::SymbolicSATProblem) = decode.(Ref(p), all_solutions(p.p))

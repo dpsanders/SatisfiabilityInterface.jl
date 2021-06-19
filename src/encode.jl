@@ -8,7 +8,47 @@ e.g. the symbolic expression z == x + y
 should become some kind of Constraint(+, z, x, y) object, where z, x and y now refer to the DiscreteVariables, not the symbolic ones!
 =#
 
+#### Constraints / relations
+#= Types of unary, binary and ternary constraint  we want to parse
 
+## Unary -- constraints on the domain of a single variable
+x   # for Boolean variables *only*, states that x is true 
+¬x  # for Boolean variables *only*, states that x is false 
+
+### Look binary but only involve one variable
+x == 1   # must write as x ~ 1 ?
+x <= 1
+
+## Binary (two *variables*)
+x == y 
+x <= y 
+x ≠ y 
+
+### Look ternary:
+x + y == 3 
+x + y <= 3
+
+## Ternary 
+x + y == z 
+x + y <= z 
+z <= x + y 
+
+
+If we introduce new variables for each sum of two other variables then these reduce significantly 
+to a single ternary constraint like z == x + y 
+and the rest binary 
+But maybe that is overkill?
+
+e.g. x + y <= z  becomes 
+
+u = x + y   # this is now an actual sum of DiscreteVariables, creating a new Node type?
+<=(u, z)    
+
+
+
+
+
+=#
 
 # struct LinearEncoder end
 
