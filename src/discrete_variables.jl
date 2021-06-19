@@ -65,3 +65,4 @@ function decode(varmap, x::Var)
 
     return x.domain[findfirst(values)]
 end
+
