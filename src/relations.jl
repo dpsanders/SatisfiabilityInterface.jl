@@ -223,7 +223,7 @@ function parse_expression(varmap, ex)
 
     new_args = parse_expression.(Ref(varmap), args)
 
-    return op(new_args...)
+    return op, new_args
 end
 
 parse_expression(varmap, ex::Num) = parse_expression(varmap, value(ex))
@@ -492,11 +492,14 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
     for constraint in prob.constraints 
         constraint = value(constraint)
         if constraint isa Assignment 
-            new_var = constraint.lhs
 
-            variable = parse_expression(varmap, constraint.rhs)   # makes a NodeVariable
+            lhs = constraint.lhs
+
+            op, new_args = parse_expression(varmap, constraint.rhs)   # makes a NodeVariable
+            variable = NodeVariable(op, new_args[1], new_args[2], lhs)
+            
             push!(variables, variable)
-            push!(varmap, new_var => variable)
+            push!(varmap, lhs => variable)
 
         else
             @show constraint
@@ -755,3 +758,29 @@ constraints = [
 
 prob = BoundedIntegerCSP(constraints) 
 all_solutions(prob)
+
+
+
+constraints = [
+    x ∈ -5:5
+    y ∈ -4:9
+    x - y^2 == 3
+    # sum(b) == w
+
+]
+
+
+prob = BoundedIntegerCSP(constraints) 
+all_solutions(prob)
+
+
+constraints = [
+    x ∈ -5:5
+    y ∈ -4:9
+    10x + y == 10
+    # sum(b) == w
+]
+
+prob = BoundedIntegerCSP(constraints) 
+all_solutions(prob)
+
