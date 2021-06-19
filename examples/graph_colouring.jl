@@ -7,26 +7,24 @@ different_colours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 "k is the number of colours"
 function graph_colouring_problem(V, E, k=3)
 
-    colours = 1:k
-    c = [Variable(:c, i) for i in 1:length(V)]   # colour variables
+    colours = [:red, :green, :yellow, :blue, :black][1:k]
+    c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
     
     constraints = [ c .∈ Ref(colours)
                     different_colours(E, c)
     ]
 
-    return BoundedIntegerCSP(c, constraints)
+    return BoundedIntegerCSP(constraints)
 end
 
-num_colours = k
-colours = 1:k 
 
-cs = [Variable(:c, i) for i in 1:length(V)]   # colour variables
+# cs = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
 
 
-constraints = [ 
-    [c ∈ colours for c in cs]
-    different_colours(E, cs)
-]
+# constraints = [ 
+#     [c ∈ colours for c in cs]
+#     different_colours(E, cs)
+# ]
 
 V = [1, 2, 3]  # vertices
 E = [(1, 2), (2, 3)]  # edges
@@ -34,10 +32,10 @@ E = [(1, 2), (2, 3)]  # edges
 prob = graph_colouring_problem(V, E, 2)
 status, results = solve(prob)
 
-final_colours = [results[k] for k in prob.variables]
+# final_colours = [second(results[k]) for k in prob.original_vars]
 
-# check that it satisfies the constraint:
-all(different_neighbours(E, final_colours))
+# # check that it satisfies the constraint:
+# all(different_neighbours(E, final_colours))
 
 
 ## Ring graph 
@@ -59,5 +57,5 @@ prob = graph_colouring_problem(V, E, 3)
 status, results = solve(prob)
 status==:sat
 
-final_colours = [results[k] for k in prob.variables]
-all(different_neighbours(E, final_colours))
+# final_colours = [results[k] for k in prob.variables]
+# all(different_neighbours(E, final_colours))
