@@ -52,6 +52,8 @@ u = x + y   # this is now an actual sum of DiscreteVariables, creating a new Nod
 
 # struct LinearEncoder end
 
+
+
 struct BoundedIntegerCSP
     variables 
     constraints

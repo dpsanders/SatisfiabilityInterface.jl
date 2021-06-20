@@ -1,11 +1,8 @@
-using Base: notify_fun
 
 
-using Symbolics
-using Symbolics: Sym, value, operation, arguments, istree, Assignment
 
-include("discrete_variables.jl")
-include("symbolics_interface.jl")
+
+
 
 struct BinaryRelation{O, S, T}
     x::S
@@ -51,7 +48,7 @@ function NodeVariable(op, x, y, name=gensym())
     NodeVariable(name, op, x, y, domain, booleans, varmap)
 end
 
-u = NodeVariable(+, x, y)
+
 
 Base.:+(x::Var, y) = NodeVariable(+, x, y)
 Base.:+(x, y::Var) = NodeVariable(+, x, y)
@@ -62,6 +59,7 @@ Base.:*(x, y::Var) = NodeVariable(*, x, y)
 
 Base.:^(x::Var, y) = NodeVariable(^, x, y)
 Base.:^(x, y::Var) = NodeVariable(^, x, y)
+
 
 function clauses(var::NodeVariable)
 
@@ -108,25 +106,11 @@ end
 
 
 
-z = x + y
-
-w = x + z
-
-# BinaryRelation(==, w, 3)
-
-booleans(w)
-
-booleans(z)
-
-recursive_booleans(w)
-
-
 
 
 Base.:(==)(v::Var, w) = BinaryRelation{==}(v, w)
 Base.:(<=)(v::Var, w) = BinaryRelation{<=}(v, w)
 
-x + z <= 1
 
 "Encode relation like x == 1"
 function encode(rel::BinaryRelation{==, <:Var, <:Real})
@@ -171,7 +155,7 @@ function encode(rel::BinaryRelation{==, <:Var, <:Var})
         
         else
             push!(clauses, ¬(x.varmap[i]))
-        end
+        end 
     end
 
     for i in domain(y)
@@ -209,13 +193,6 @@ end
 
 
 
-encode(x + z == 5)
-encode(x + z + z == 7)
-
-domain(x + z + z)
-
-parse_expression(varmap, ex::Real) = ex
-parse_expression(varmap, ex::Sym) = varmap[ex]
 
 function parse_expression(varmap, ex) 
     op = operation(ex)
@@ -226,7 +203,9 @@ function parse_expression(varmap, ex)
     return op, new_args
 end
 
+parse_expression(varmap, ex::Sym) = varmap[ex]
 parse_expression(varmap, ex::Num) = parse_expression(varmap, value(ex))
+parse_expression(varmap, ex::Real) = ex
 
 
 "Parse a symbolic expression into a relation"
@@ -242,47 +221,12 @@ function parse_relation(varmap, ex)
 
 end
 
-function parse_relation!(varmap, ex::Equation)
+
+# function parse_relation!(varmap, ex::Equation)
     
-    varmap[ex.lhs] = parse_expression(varmap, ex.rhs)   
+#     varmap[ex.lhs] = parse_expression(varmap, ex.rhs)   
 
-end
-
-# parse_relation!(varmap, ex::Num) = parse_relation!(varmap, value(ex))
-
-# @variables x, y
-
-# varmap = Dict()
-# varmap[x] = DiscreteVariable(:x, 1:5)
-# varmap[y] = DiscreteVariable(:y, 2:6)
-
-# parse_expression(varmap, x + y)
-
-
-# parse_relation!(varmap, z ~ x + y)
-
-
-# parse_relation!(varmap, z <= x + y*x)
-
-# parse_relation!(varmap, x + y == 3)
-
-# encode(ans)
-
-#=
-The difference between z ~ x + y and z == x + y is whether the domain of z is already fixed.
-z ~ x + y means that z is defined in that way
-
-(z must still be declared with @variable though)
-=#
-
-# domain(varmap[x] + varmap[y])
-
-
-using ReversePropagation
-
-@variables x, y, w, z
-ex = x + y
-ReversePropagation.cse_equations(ex)
+# end
 
 
 function process(constraint)
@@ -315,54 +259,17 @@ function process(constraint)
         rhs = rhs[2]
     end
 
-    @show new_constraints
-    @show op, lhs, rhs
+    # @show new_constraints
+    # @show op, lhs, rhs
     push!(new_constraints, op(lhs, rhs))
 
     return new_constraints
 
 end
 
-constraint = x + y <= 1
-lhs, rhs = process(constraint)
-
-
-constraint = x + y <= w + z
-lhs, rhs = process(constraint)
-
-constraint = x + y + w + z == w
-lhs, rhs = process(constraint)
-
-constraint = b[1] + b[2] + b[3] + b[4] == w
-constraint
-typeof(constraint)
-
-typeof((w + x + y + z) == w)
-
-lhs, rhs = process(constraint)
-
-
-constraints = [
-    # x ∈ 1:2
-    # y ∈ 2:5
-    # z ∈ 3:7
-    # w ∈ 4:4
-    z == x * y
-    z ≠ w
-]
 
 process(constraints::Vector) = reduce(vcat, process(constraint) for constraint in constraints)
     
-process(constraints)
-
-for constraint in constraints 
-    @show constraint
-    @show process(constraint)
-end
-
-# @edit @variables x
-
-
 
 
 
@@ -386,8 +293,8 @@ function parse_constraint!(domains, ex)
         new_constraints = process(expr)
         
         println()
-        @show expr
-        @show new_constraints
+        # @show expr
+        # @show new_constraints
 
     end
 
@@ -396,24 +303,15 @@ function parse_constraint!(domains, ex)
 end
 
 
-#=
-Once we have parsed all the constraints, we are ready to create the true 
-ConstraintSatisfactionProblem
-=#
-
-## TODO
-# Handle unary constraints like z <= x 
-# Handle z == 2
-# Handle x + y == 2   
-# Handle x + y <= 4   (probably add a new variable z = x + y)
-
 function parse_constraints(constraints)
     # domains = Dict(var => -Inf..Inf for var in vars)
+
     additional_vars = []
     domains = Dict()
     all_new_constraints = []  # excluding domain constraints
 
     for constraint in constraints
+
         # binarize constraints: 
         domains, new_constraints = parse_constraint!(domains, value(constraint))
 
@@ -434,12 +332,6 @@ end
 
 
 
-# domains, new_constraints, additional_vars = parse_constraints(constraints)
-
-# domains
-
-# new_constraints
-
 Base.isless(x::Sym, y::Sym) = isless(x.name, y.name)
 
 struct ConstraintSatisfactionProblem 
@@ -459,20 +351,12 @@ function ConstraintSatisfactionProblem(constraints)
 end
 
 
-prob = ConstraintSatisfactionProblem(constraints)
-
-prob.domains
-
 struct BoundedIntegerCSP
     original_vars
     additional_vars
     constraints
     varmap   # maps symbolic variables to the corresponding DiscreteVariable
 end
-
-# varmap gives the translation from strictly symbolic objects to actual Julia objects
-
-# get_bounds(x::Interval) = ceil(Int, x.lo):floor(Int, x.hi)
 
 
 BoundedIntegerCSP(constraints) = BoundedIntegerCSP(ConstraintSatisfactionProblem(constraints))
@@ -496,13 +380,16 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
             lhs = constraint.lhs
 
             op, new_args = parse_expression(varmap, constraint.rhs)   # makes a NodeVariable
+
+            # @show op, new_args 
+
             variable = NodeVariable(op, new_args[1], new_args[2], lhs)
             
             push!(variables, variable)
             push!(varmap, lhs => variable)
 
         else
-            @show constraint
+            # @show constraint
             push!(new_constraints, parse_relation(varmap, constraint))
         end
     end
@@ -514,11 +401,7 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
 end
 
 
-prob2 = BoundedIntegerCSP(constraints)
 
-include("sat_problem.jl")
-include("symbolic_problem.jl")
-include("solver.jl")
 
 function encode(prob::BoundedIntegerCSP)
     all_variables = []
@@ -537,7 +420,7 @@ function encode(prob::BoundedIntegerCSP)
     # @show prob.constraints
 
     for constraint in prob.constraints 
-        @show constraint
+        # @show constraint
         append!(all_clauses, encode(constraint))
     end
 
@@ -588,199 +471,3 @@ function all_solutions(prob::BoundedIntegerCSP)
     return solutions
 
 end
-
-
-
-constraints = [
-    x ∈ 1:2
-    y ∈ 2:5
-    z ∈ 3:7
-    z == x * y
-    z ≠ 4
-]
-
-prob = ConstraintSatisfactionProblem(constraints)
-prob2 = BoundedIntegerCSP(prob)
-prob3 = encode(prob2)
-
-solve(prob3)
-
-solve(prob2)
-
-prob2.additional_vars[1].domain
-
-
-constraints = [
-    x ∈ 1:2
-    y ∈ 2:5
-    z ∈ 3:7
-    z == x * y
-]
-
-
-prob = ConstraintSatisfactionProblem(constraints)
-prob2 = BoundedIntegerCSP(prob)
-prob3 = encode(prob2)
-prob4 = prob3.p
-
-solve(prob3)
-solve(prob2)
-
-solns = all_solutions(prob4)
-all_solutions(prob3)
-
-### 
-
-constraints = [
-    x ∈ 1:2
-    y ∈ 2:5
-    z ∈ 3:7
-    z == x * y + x
-    x > 1
-]
-
-
-
-prob = BoundedIntegerCSP(constraints)
-all_solutions(prob)
-
-
-
-
-### BeeEncoder example
-
-#=
-@beeint x  0 5
-@beeint y -4 9
-@beeint z -5 10
-
-@constrain x + y == z
-
-@beeint w 0 10
-
-xl = @beebool x[1:4]
-
-@constrain xl[1] == -xl[2]
-@constrain xl[2] == true
-
-@constrain sum([-xl[1], xl[2], -xl[3], xl[4]]) == w
-=#
-
-@variables x, y, z, w
-b = Num.(Variable.(:b, 1:4))
-@variables c, d
-
-constraints = [
-    x ∈ 0:5
-    y ∈ -4:9
-    z ∈ -5:10
-    w ∈ 0:10
-    b .∈ Ref(0:1)  # boolean
-    c ∈ 0:1
-    d ∈ 0:1
-    x + y == z
-    b[1] + b[2] == 1
-    b[2] == 1
-    c + b[1] == 1   # encode c = ¬b[1]
-    d + b[3] == 1
-
-    c + b[2] + d + b[4] == w
-    # sum(b) == w
-
-]
-
-
-prob = ConstraintSatisfactionProblem(constraints)
-prob2 = BoundedIntegerCSP(prob)
-prob3 = encode(prob2)
-
-status, results = solve(prob3)
-
-decode(prob2, results)
-
-solve(prob2)
-
-prob2.original_vars
-
-all_solutions(prob2)
-
-
-
-constraints = [
-    x ∈ 0:5
-    y ∈ -4:9
-    x == 2y
-    # sum(b) == w
-
-]
-
-prob = BoundedIntegerCSP(constraints) 
-solve(prob)
-
-all_solutions(prob)
-
-prob.additional_vars
-
-
-
-constraints = [
-    x ∈ 0:5
-    y ∈ -4:9
-    x == -y
-    # sum(b) == w
-
-]
-
-prob = BoundedIntegerCSP(constraints) 
-solve(prob)
-all_solutions(prob)
-
-
-constraints = [
-    x ∈ 0:5
-    y ∈ -4:9
-    x == -2y
-    # sum(b) == w
-
-]
-
-prob = BoundedIntegerCSP(constraints) 
-all_solutions(prob)
-
-
-constraints = [
-    x ∈ -5:5
-    y ∈ -4:9
-    x == -y^2
-    # sum(b) == w
-
-]
-
-prob = BoundedIntegerCSP(constraints) 
-all_solutions(prob)
-
-
-
-constraints = [
-    x ∈ -5:5
-    y ∈ -4:9
-    x - y^2 == 3
-    # sum(b) == w
-
-]
-
-
-prob = BoundedIntegerCSP(constraints) 
-all_solutions(prob)
-
-
-constraints = [
-    x ∈ -5:5
-    y ∈ -4:9
-    10x + y == 10
-    # sum(b) == w
-]
-
-prob = BoundedIntegerCSP(constraints) 
-all_solutions(prob)
-
