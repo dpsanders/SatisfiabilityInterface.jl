@@ -444,7 +444,7 @@ function solve(prob::BoundedIntegerCSP)
     return status, decode(prob, result_dict)
 end
 
-decode(prob::BoundedIntegerCSP, result_dict) = [v => decode(result_dict, v) for v in prob.original_vars]
+decode(prob::BoundedIntegerCSP, result_dict) = Dict(v.name => decode(result_dict, v) for v in prob.original_vars)
     
 
 
