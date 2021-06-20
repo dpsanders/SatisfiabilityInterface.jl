@@ -9,7 +9,7 @@ using ReversePropagation
 export DiscreteVariable, ConstraintSatisfactionProblem, BoundedIntegerCSP, SymbolicSATProblem, SATProblem
 export read_cnf, SATProblem
 export satisfies
-export encode, solve
+export encode, solve, all_solutions
 
 # functions to be extend:
 import Base: push!
