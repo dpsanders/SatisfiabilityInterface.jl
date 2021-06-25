@@ -13,5 +13,6 @@ include("model.jl")
 include("sat_problem.jl")
 include("solver.jl")
 include("symbolic_problem.jl")
+include("MOI_wrapper.jl")
 
 end

@@ -10,7 +10,7 @@ Input:
 """SAT problem represented numerically in DIMACS-CNF form:
 clauses are integer vectors with negative numbers indicating negated literals
 """
-struct SATProblem
+mutable struct SATProblem
     num_variables::Int
     clauses::Vector{Vector{Int}} 
 end
