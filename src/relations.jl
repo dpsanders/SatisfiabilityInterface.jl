@@ -203,6 +203,7 @@ function parse_expression(varmap, ex)
     return op, new_args
 end
 
+parse_expression(varmap, ex::Term) = varmap[ex]
 parse_expression(varmap, ex::Sym) = varmap[ex]
 parse_expression(varmap, ex::Num) = parse_expression(varmap, value(ex))
 parse_expression(varmap, ex::Real) = ex
@@ -228,6 +229,7 @@ end
 
 # end
 
+is_variable(ex) = !istree(ex) || (operation(ex) == getindex)
 
 function process(constraint)
 
@@ -241,22 +243,22 @@ function process(constraint)
     lhs = args[1]
     rhs = args[2]
 
-    if istree(lhs)
+    intermediates_generated = false
+
+    if !is_variable(lhs)
         lhs = ReversePropagation.cse_equations(lhs)
-    end
 
-    if istree(rhs)
-        rhs = ReversePropagation.cse_equations(rhs)
-    end
-
-    if length(lhs) > 1  # intermediate variables were generated 
         append!(new_constraints, lhs[1])
         lhs = lhs[2]
+
     end
 
-    if length(rhs) > 1  # intermediate variables were generated 
+    if !is_variable(rhs)
+        rhs = ReversePropagation.cse_equations(rhs)
+
         append!(new_constraints, rhs[1])
         rhs = rhs[2]
+
     end
 
     # @show new_constraints
@@ -333,6 +335,9 @@ end
 
 
 Base.isless(x::Sym, y::Sym) = isless(x.name, y.name)
+Base.isless(x::Term, y::Term) = isless(string(x), string(y))
+Base.isless(x::Term, y::Sym) = isless(string(x), string(y))
+Base.isless(x::Sym, y::Term) = isless(string(x), string(y))
 
 struct ConstraintSatisfactionProblem 
     original_vars 
@@ -344,6 +349,7 @@ end
 function ConstraintSatisfactionProblem(constraints)
 
     domains, new_constraints, additional_vars = parse_constraints(constraints)
+    @show keys(domains)
     vars = sort(identity.(keys(domains)))
     additional_vars = sort(identity.(additional_vars))
 

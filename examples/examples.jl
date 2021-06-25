@@ -102,20 +102,25 @@ all_solutions(prob)
 
 ## Example from https://github.com/newptcai/BeeEncoder.jl
 
-@variables x, y, z, w
-b = Num.(Variable.(:b, 1:4))
+function make_vector(name::Symbol, range)
+    return Num.(Variable.(name, range))
+end
 
-¬(x::Num) = 1 - x
+@variables x, y, z, w
+b = make_vector(:b, 1:4)
+# @variables b[1:4]
+
+
+¬(x::Num) = 1 - x   # assumes a Boolean variable
 
 constraints = [
     x ∈ 0:5
     y ∈ -4:9
     z ∈ -5:10
     w ∈ 0:10
-    [b[i] ∈ 0:1 for i in 1:4] 
-    c ∈ 0:1
-    d ∈ 0:1
 
+    [bb ∈ 0:1 for bb ∈ b]
+    
     x + y == z
     
     b[1] == ¬b[2]
