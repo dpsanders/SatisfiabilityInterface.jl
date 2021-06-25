@@ -8,10 +8,15 @@ different_colours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 function graph_colouring_problem(V, E, k=3)
 
     colours = [:red, :green, :yellow, :blue, :black][1:k]
-    c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
+    # c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
+
+    @variables c[1:length(V)]
     
-    constraints = [ c .∈ Ref(colours)
-                    different_colours(E, c)
+    constraints = 
+    [ 
+        [c[i] ∈ colours for i in 1:length(V)]
+        
+        [c[i] ≠ c[j] for (i, j) in E]  #  different_colours(E, c)
     ]
 
     return BoundedIntegerCSP(constraints)
@@ -25,6 +30,8 @@ end
 #     [c ∈ colours for c in cs]
 #     different_colours(E, cs)
 # ]
+
+
 
 V = [1, 2, 3]  # vertices
 E = [(1, 2), (2, 3)]  # edges
@@ -59,3 +66,27 @@ status==:sat
 
 # final_colours = [results[k] for k in prob.variables]
 # all(different_neighbours(E, final_colours))
+
+ConstraintSatisfactionProblem(constraints)
+
+
+
+k = 3
+colours = [:red, :green, :yellow, :blue, :black][1:k]
+
+
+constraints = 
+    [ 
+        [c[i] ∈ colours for i in 1:length(V)]
+        
+        [c[i] ≠ c[j] for (i, j) in E]  #  different_colours(E, c)
+    ]
+
+constraints
+
+prob = ConstraintSatisfactionProblem(constraints)
+prob2 = BoundedIntegerCSP(prob)
+
+solve(prob2)
+
+«prob.original_vars
