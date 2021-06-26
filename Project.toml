@@ -5,13 +5,16 @@ version = "0.1.0"
 
 [deps]
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
+CommonSolve = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+ReversePropagation = "527681c1-8309-4d3f-8790-caf822a419ba"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
 MathOptInterface = "0.9.22"
 JuMP = "0.21.8"
-ModelingToolkit = "4.3"
+Symbolics = "1"
 julia = "1"
+ReversePropagation = "0.1"
 
 [extras]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"

@@ -11,33 +11,26 @@ using SatisfiabilityInterface: subscript
         return [vv[i] ≠ vv[j] for i in 1:n for j in i+1:n]
     end
 
-
-
-    function make_matrix(name, T, m, n)
-        return [T(Symbol(name, subscript(i), ",", subscript(j))) 
-            for i in 1:m, j in 1:n]
+    function make_matrix(name, m, n)
+        return [Variable(name, i, j) for i in 1:m, j in 1:n]
     end
 
     n = 9
-    M = make_matrix(:M, BoundedInteger{n}, n, n)
+    M = make_matrix(:M, n, n)
 
-    m = Model()
+    constraints = [ 
+        [all_different(M[:, i]) for i in 1:n];
+        [all_different(M[i, :]) for i in 1:n];
 
-    push!(m, vec(M)...)
+    ] |> Iterators.flatten
 
-
-    for i in 1:n
-        append!(m.constraints, all_different(M[:, i]))  # columns
-        append!(m.constraints, all_different(M[i, :]))  # rows
-    end
-
+   
     # blocks:
     for i in 0:2, j in 0:2
         append!(m.constraints, all_different(M[3i+1:3i+3, 3j+1:3j+3]))
     end
 
-    i, j = 0, 0
-    all_different(M[3i+1:3i+3, 3j+1:3j+3])
+  
 
     ## initial condition from https://www.juliaopt.org/notebooks/JuMP-Sudoku.html
 

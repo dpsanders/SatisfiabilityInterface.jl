@@ -25,7 +25,9 @@ function SATProblem(clauses::Vector{Vector{Int}})
     return SATProblem(num_variables, clauses)
 end
 
-push!(p::SATProblem, clause) = push!(p.clauses, clause)
+Base.push!(p::SATProblem, clause) = push!(p.clauses, clause)
+
+"Ban a clause, i.e. add the negative of the clause"
 ban!(p::SATProblem, clause) = push!(p, .-(clause))
 
 

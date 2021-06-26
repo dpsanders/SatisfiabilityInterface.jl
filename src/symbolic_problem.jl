@@ -1,3 +1,12 @@
+using Symbolics: Term
+
+"Index mapping variables to integers"
+struct IndexDict
+    index::Dict{Sym, Int}
+end
+
+IndexDict(vars::Vector{<:Sym}) = IndexDict(Dict(v => i for (i, v) in enumerate(vars)))
+
 
 
 struct SymbolicSATProblem 
@@ -10,7 +19,7 @@ end
 
 function process(d::IndexDict, var::Sym)
     if !haskey(d.index, var)
-        error("$c is not in the problem")
+        error("$var is not in the problem")
     end
 
     return [ d.index[var] ]
@@ -53,7 +62,7 @@ function SymbolicSATProblem(variables::Vector{<:Sym}, symbolic_clauses)
     return SymbolicSATProblem(variables, symbolic_clauses, d, p)
 end
 
-SymbolicSATProblem(m::Model) = SymbolicSATProblem(boolean_variables(m), clauses(m))
+# SymbolicSATProblem(m::Model) = SymbolicSATProblem(boolean_variables(m), clauses(m))
 
 
 
@@ -69,3 +78,7 @@ function solve(p::SymbolicSATProblem)
     return status, decode(p.variables, results)
 
 end
+
+decode(p::SymbolicSATProblem, results::Vector{Int}) = decode(p.variables, results)
+
+all_solutions(p::SymbolicSATProblem) = decode.(Ref(p), all_solutions(p.p))

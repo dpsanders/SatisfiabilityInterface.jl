@@ -2,13 +2,17 @@
 
 different_neighbours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 
+"k is the number of colours"
 function graph_colouring_problem(V, E, k=3)
 
-    c = make_vector(:c, BoundedInteger{k}, length(V))  # colour variables
+    colours = 1:k
+    c = [Sym{Real}(:c, i) for i in 1:length(V)]   # colour variables
     
-    m = Model(c, different_neighbours(E, c))
+    constraints = [ c[i] ∈ colours for i in 1:length(V)
+                    different_neighbours(E, c)
+    ]
 
-    return m
+    return BoundedIntegerCSP(c, constraints)
 end
 
 
@@ -17,12 +21,12 @@ end
     V = [1, 2, 3]  # vertices
     E = [(1, 2), (2, 3)]  # edges
 
-    m = graph_colouring_problem(V, E, 2)
-    status, results = solve(m)
+    prob = graph_colouring_problem(V, E, 2)
+    status, results = solve(prob)
 
     @test status==:sat
 
-    colours = [results[k] for k in SatisfiabilityInterface.variables(m)]
+    colours = [results[k] for k in prob.variables]
 
     @test all(different_neighbours(E, colours))
 end
@@ -38,15 +42,15 @@ end
 
     V, E = ring_graph(11)
 
-    m = graph_colouring_problem(V, E, 2)
-    status, results = solve(m)
+    prob = graph_colouring_problem(V, E, 2)
+    status, results = solve(prob)
     @test status==:unsat
 
-    m = graph_colouring_problem(V, E, 3)
-    status, results = solve(m)
+    prob = graph_colouring_problem(V, E, 3)
+    status, results = solve(prob)
     @test status==:sat
 
-    colours = [results[k] for k in SatisfiabilityInterface.variables(m)]
+    colours = [results[k] for k in prob.variables]
 
     @test all(different_neighbours(E, colours))
 
