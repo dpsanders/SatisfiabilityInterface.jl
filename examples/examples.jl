@@ -113,6 +113,7 @@ b = make_vector(:b, 1:4)
 
 ¬(x::Num) = 1 - x   # assumes a Boolean variable
 
+
 constraints = [
     x ∈ 0:5
     y ∈ -4:9
@@ -163,4 +164,5 @@ constraints = [
 
 prob = BoundedIntegerCSP(constraints) 
 all_solutions(prob)
+
 
