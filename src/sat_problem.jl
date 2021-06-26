@@ -3,7 +3,7 @@
 Numeric representation of SAT problem in DIMACS-CNF form
 
 Input: 
-- `vars` is a list of symbolic Boolean variables
+- `num_variables` is the number of symbolic Boolean variables
 - `clauses` are integer vectors; negative numbers indicate negated variables
 """
 
