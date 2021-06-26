@@ -4,6 +4,9 @@ using SatisfiabilityInterface, Symbolics
 "Constraints representing different colours for each edge of a graph"
 different_colours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 
+
+
+
 "k is the number of colours"
 function graph_colouring_problem(V, E, k=3)
 
@@ -89,4 +92,7 @@ prob2 = BoundedIntegerCSP(prob)
 
 solve(prob2)
 
-«prob.original_vars
+
+k = 3
+
+
