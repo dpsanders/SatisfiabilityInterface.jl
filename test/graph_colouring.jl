@@ -6,9 +6,9 @@ different_neighbours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 function graph_colouring_problem(V, E, k=3)
 
     colours = 1:k
-    c = [Variable(:c, i) for i in 1:length(V)]   # colour variables
+    c = [Sym{Real}(:c, i) for i in 1:length(V)]   # colour variables
     
-    constraints = [ c .∈ Ref(colours);
+    constraints = [ c[i] ∈ colours for i in 1:length(V)
                     different_neighbours(E, c)
     ]
 
