@@ -22,7 +22,7 @@ function graph_colouring_problem(V, E, k=3)
         [c[i] ≠ c[j] for (i, j) in E]  #  different_colours(E, c)
     ]
 
-    return BoundedIntegerCSP(constraints)
+    return DiscreteCSP(constraints)
 end
 
 
@@ -88,7 +88,7 @@ constraints =
 constraints
 
 prob = ConstraintSatisfactionProblem(constraints)
-prob2 = BoundedIntegerCSP(prob)
+prob2 = DiscreteCSP(prob)
 
 solve(prob2)
 

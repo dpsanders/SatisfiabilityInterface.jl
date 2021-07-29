@@ -12,7 +12,7 @@ function graph_colouring_problem(V, E, k=3)
                     different_neighbours(E, c)
     ]
 
-    return BoundedIntegerCSP(c, constraints)
+    return DiscreteCSP(c, constraints)
 end
 
 

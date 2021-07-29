@@ -41,7 +41,7 @@ initial = [
 
 ] |> Iterators.flatten |> collect
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 
 @time status, results = solve(prob);
 

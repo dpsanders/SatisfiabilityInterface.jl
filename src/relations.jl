@@ -357,7 +357,7 @@ function ConstraintSatisfactionProblem(constraints)
 end
 
 
-struct BoundedIntegerCSP
+struct DiscreteCSP
     original_vars
     additional_vars
     constraints
@@ -365,9 +365,9 @@ struct BoundedIntegerCSP
 end
 
 
-BoundedIntegerCSP(constraints) = BoundedIntegerCSP(ConstraintSatisfactionProblem(constraints))
+DiscreteCSP(constraints) = DiscreteCSP(ConstraintSatisfactionProblem(constraints))
 
-function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
+function DiscreteCSP(prob::ConstraintSatisfactionProblem)
     variables = []
     varmap = Dict()
 
@@ -403,13 +403,13 @@ function BoundedIntegerCSP(prob::ConstraintSatisfactionProblem)
     original_vars = [varmap[var] for var in prob.original_vars]
     additional_vars = [varmap[var] for var in prob.additional_vars]
    
-    return BoundedIntegerCSP(original_vars, additional_vars, new_constraints, varmap)
+    return DiscreteCSP(original_vars, additional_vars, new_constraints, varmap)
 end
 
 
 
 
-function encode(prob::BoundedIntegerCSP)
+function encode(prob::DiscreteCSP)
     all_variables = []
     all_clauses = []
 
@@ -437,7 +437,7 @@ function encode(prob::BoundedIntegerCSP)
 end
 
 
-function solve(prob::BoundedIntegerCSP)
+function solve(prob::DiscreteCSP)
     symbolic_sat_problem = encode(prob)
 
     status, result_dict = solve(symbolic_sat_problem)
@@ -450,11 +450,11 @@ function solve(prob::BoundedIntegerCSP)
     return status, decode(prob, result_dict)
 end
 
-decode(prob::BoundedIntegerCSP, result_dict) = Dict(v.name => decode(result_dict, v) for v in prob.original_vars)
+decode(prob::DiscreteCSP, result_dict) = Dict(v.name => decode(result_dict, v) for v in prob.original_vars)
     
 
 
-function all_solutions(prob::BoundedIntegerCSP)
+function all_solutions(prob::DiscreteCSP)
     sat_problem = encode(prob)
     # variables = Any[prob.original_vars; prob.additional_vars]
     variables = prob.original_vars
