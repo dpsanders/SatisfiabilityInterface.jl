@@ -11,7 +11,7 @@ constraints = [
     z == x * y
 ]
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 
 solve(prob)
 
@@ -32,7 +32,7 @@ constraints = [
     w == z + x
 ]
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 solve(prob)
 all_solutions(prob)
 
@@ -46,7 +46,7 @@ constraints = [
     z == 2x
 ]
 
-all_solutions(BoundedIntegerCSP(constraints))
+all_solutions(DiscreteCSP(constraints))
 
 ###
 
@@ -79,7 +79,7 @@ constraints = [
     sum(x) ≠ 0   # at least one is not 0
     ]
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 
 all_solutions(prob)
 
@@ -97,7 +97,7 @@ constraints = [
 
 
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 all_solutions(prob)
 
 ## Example from https://github.com/newptcai/BeeEncoder.jl
@@ -130,7 +130,7 @@ constraints = [
     ¬b[1] + b[2] + ¬b[3] + b[4] == w
 ]
 
-prob = BoundedIntegerCSP(constraints)
+prob = DiscreteCSP(constraints)
 solve(prob)
 
 # @time length(all_solutions(prob))   # 1184 solutions in 38 seconds
@@ -148,7 +148,7 @@ constraints = [
 ]
 
 
-prob = BoundedIntegerCSP(constraints) 
+prob = DiscreteCSP(constraints) 
 all_solutions(prob)
 
 ### 
@@ -162,7 +162,7 @@ constraints = [
     # sum(b) == w
 ]
 
-prob = BoundedIntegerCSP(constraints) 
+prob = DiscreteCSP(constraints) 
 all_solutions(prob)
 
 

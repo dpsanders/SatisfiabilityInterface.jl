@@ -22,4 +22,6 @@ const DiscreteTypes = Union{Integer, Symbol}
 
 
 ∨(x...) = foldl(∨, x)
+# ∨(x...) = Symbolics.Term(∨, [x...])
 ∧(x...) = foldl(∧, x)
+

@@ -4,9 +4,9 @@ using Symbolics
 using Symbolics: Variable, Sym
 using Symbolics: Assignment, get_variables, operation, arguments, value, istree
 
-using ReversePropagation
+# using ReversePropagation
 
-export DiscreteVariable, ConstraintSatisfactionProblem, BoundedIntegerCSP, SymbolicSATProblem, SATProblem
+export DiscreteVariable, ConstraintSatisfactionProblem, DiscreteCSP, SymbolicSATProblem, SATProblem
 export read_cnf, SATProblem
 export satisfies
 export encode, solve, all_solutions
