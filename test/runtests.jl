@@ -7,7 +7,7 @@ using Test
 
     include("graph_colouring.jl")
     include("sudoku.jl")
-    include("MOI_wrapper.jl")
+    # include("MOI_wrapper.jl")
     include("JuMP.jl")
 
 end
