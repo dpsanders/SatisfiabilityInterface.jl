@@ -1,3 +1,6 @@
+using SatisfiabilityInterface
+using Symbolics
+using Symbolics: Sym
 
 function all_different(v)
     vv = vec(v)
@@ -7,7 +10,7 @@ function all_different(v)
 end
 
 function make_matrix(name, m, n)
-    return [Num(Variable(name, i, j)) for i in 1:m, j in 1:n]
+    return [Num(Sym{Real}(name, i, j)) for i in 1:m, j in 1:n]
 end
 
 n = 9
@@ -29,7 +32,7 @@ initial = [
     ]
 
 
-    constraints = [ 
+constraints = [ 
     [M[i, j] ∈ 1:9 for i in 1:n for j in 1:n]
     
     [all_different(M[:, i]) for i in 1:n]

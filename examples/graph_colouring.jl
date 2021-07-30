@@ -70,12 +70,13 @@ status==:sat
 # final_colours = [results[k] for k in prob.variables]
 # all(different_neighbours(E, final_colours))
 
-ConstraintSatisfactionProblem(constraints)
 
 
 
 k = 3
 colours = [:red, :green, :yellow, :blue, :black][1:k]
+
+c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
 
 
 constraints = 

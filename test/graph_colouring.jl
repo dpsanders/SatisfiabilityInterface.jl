@@ -1,18 +1,27 @@
-
+using SatisfiabilityInterface
+using Symbolics
 
 different_neighbours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 
-"k is the number of colours"
+"Set up a graph colouring problem for a graph 
+with vertex set `V`, edge set `E` (a vector of edges (i, j)),
+with `k` colours"
 function graph_colouring_problem(V, E, k=3)
 
-    colours = 1:k
-    c = [Sym{Real}(:c, i) for i in 1:length(V)]   # colour variables
+    colours = [:red, :green, :yellow, :blue, :black][1:k]
+
+    # c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
+
+    @variables c[1:length(V)]
     
-    constraints = [ c[i] ∈ colours for i in 1:length(V)
-                    different_neighbours(E, c)
+    constraints = 
+    [ 
+        [c[i] ∈ colours for i in 1:length(V)]
+        
+        [c[i] ≠ c[j] for (i, j) in E]  #  different_colours(E, c)
     ]
 
-    return DiscreteCSP(c, constraints)
+    return DiscreteCSP(constraints)
 end
 
 
@@ -26,7 +35,8 @@ end
 
     @test status==:sat
 
-    colours = [results[k] for k in prob.variables]
+    ks = sort(collect(keys(prob.varmap)))
+    colours = [results[k] for k in ks]
 
     @test all(different_neighbours(E, colours))
 end
@@ -50,8 +60,9 @@ end
     status, results = solve(prob)
     @test status==:sat
 
-    colours = [results[k] for k in prob.variables]
-
+    ks = sort(collect(keys(prob.varmap)))
+    colours = [results[k] for k in ks]
+    
     @test all(different_neighbours(E, colours))
 
 end
