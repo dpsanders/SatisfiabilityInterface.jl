@@ -1,6 +1,6 @@
-# SatisfiabilityInterface.jlg
+# `SatisfiabilityInterface.jl` 
 
-An interface in [Julia](www.julialang.org) for modelling discrete constraint satisfaction problems and encoding them to Boolean satisfiability (SAT) problems.
+A [Julia](www.julialang.org) package for modelling discrete constraint satisfaction problems and encoding them to Boolean satisfiability (SAT) problems.
 
 ## Usage
 
