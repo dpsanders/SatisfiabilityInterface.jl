@@ -1,5 +1,6 @@
-using SatisfiabilityInterface: subscript
-
+using SatisfiabilityInterface
+using Symbolics
+using Symbolics: Sym
 
 @testset "Sudoku" begin
 
@@ -12,47 +13,44 @@ using SatisfiabilityInterface: subscript
     end
 
     function make_matrix(name, m, n)
-        return [Variable(name, i, j) for i in 1:m, j in 1:n]
+        return [Num(Sym{Real}(name, i, j)) for i in 1:m, j in 1:n]
     end
 
     n = 9
     M = make_matrix(:M, n, n)
 
-    constraints = [ 
-        [all_different(M[:, i]) for i in 1:n];
-        [all_different(M[i, :]) for i in 1:n];
-
-    ] |> Iterators.flatten
-
-   
-    # blocks:
-    for i in 0:2, j in 0:2
-        append!(m.constraints, all_different(M[3i+1:3i+3, 3j+1:3j+3]))
-    end
-
-  
 
     ## initial condition from https://www.juliaopt.org/notebooks/JuMP-Sudoku.html
 
     initial = [
-    5 3 -1 -1 7 -1 -1 -1 -1
-    6 -1 -1 1 9 5 -1 -1 -1
-    -1 9 8 -1 -1 -1 -1 6 -1
-    8 -1 -1 -1 6 -1 -1 -1 3
-    4 -1 -1 8 -1 3 -1 -1 1
-    7 -1 -1 -1 2 -1 -1 -1 6
-    -1 6 -1 -1 -1 -1 2 8 -1
-    -1 -1 -1 4 1 9 -1 -1 5
-    -1 -1 -1 -1 8 -1 -1 7 9
+        5 3 -1 -1 7 -1 -1 -1 -1
+        6 -1 -1 1 9 5 -1 -1 -1
+        -1 9 8 -1 -1 -1 -1 6 -1
+        8 -1 -1 -1 6 -1 -1 -1 3
+        4 -1 -1 8 -1 3 -1 -1 1
+        7 -1 -1 -1 2 -1 -1 -1 6
+        -1 6 -1 -1 -1 -1 2 8 -1
+        -1 -1 -1 4 1 9 -1 -1 5
+        -1 -1 -1 -1 8 -1 -1 7 9
     ]
 
-    for i in 1:9, j in 1:9
-        if initial[i, j] > 0 
-            push!(m.constraints, M[i, j] ~ initial[i, j])
-        end
-    end
+    constraints = [ 
+        [M[i, j] ∈ 1:9 for i in 1:n for j in 1:n]
+        
+        [all_different(M[:, i]) for i in 1:n]
+        [all_different(M[i, :]) for i in 1:n]
 
-    @time status, results = solve(m);
+        # blocks: 
+        [all_different( M[ 3i+1 : 3i+3, 3j+1 : 3j+3 ] ) for i in 0:2 for j in 0:2]
+
+        [M[i, j] == initial[i, j] for i in 1:9 for j in 1:9 if initial[i, j] > 0]
+
+]    |> Iterators.flatten |> collect
+
+
+    prob = DiscreteCSP(constraints)
+
+    @time status, results = solve(prob);
 
     output = [results[M[i, j]] for i in 1:9, j in 1:9]
 
