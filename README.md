@@ -11,7 +11,7 @@ See also the `examples` directory for basic usage.
 
 
 
-Currently you need to have the `CryptoMiniSAT5` SAT solver installed, e.g. with
+Currently for actually solving the resulting SAT problem you need to install the `CryptoMiniSAT5` SAT solver, e.g. with
 
 `brew install cryptominisat`
 
