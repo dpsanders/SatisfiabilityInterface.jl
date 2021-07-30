@@ -23,7 +23,7 @@ end
 parse_line(s) = parse.(Int, split(s)[2:end])
 
 # exit codes from CryptoMiniSat:
-const SAT_status = Dict(10 => :sat, 
+const SAT_status = Dict(10 => :sat,
                          15 => :unknown,
                          20 => :unsat)
 
@@ -47,13 +47,13 @@ Object representing an external SAT solver binary (executable).
 - `status`: Dictionary containing exit codes and their interpretation
 """
 struct ExternalSATSolver <: AbstractSATSolver
-    name::String 
+    exe
     options::String
     status::Dict{Int, Symbol}
 end
 
-const cryptominisat = 
-    ExternalSATSolver("cryptominisat5", "", 
+const cryptominisat =
+    ExternalSATSolver(CryptoMiniSat_jll.cryptominisat5, "",
                 Dict(10 => :sat,
                      15 => :unknown,
                      20 => :unsat) )
@@ -63,32 +63,32 @@ Call a solver executable (binary) that takes `.cnf` input.
 The solver's standard output is captured to a file.
 """
 function call_solver(solver; input="_input.cnf", output="_out.txt")
-
     # run the solver:
-    cmd = `$(solver.name) $input`
-    
-    pipe = pipeline(cmd, stdout=output)
-    out = run(pipe, wait=false);
-    wait(out)
+    solver.exe() do exe
+        cmd = `$(exe) $input`
 
-    status = solver.status[out.exitcode]
+        pipe = pipeline(cmd, stdout=output)
+        out = run(pipe, wait=false);
+        wait(out)
 
-    status ∈ (:unsat, :unknown) && return status, Int[]
+        status = solver.status[out.exitcode]
 
-    output = filter(line -> !startswith(line, "c"), readlines(output))
+        status ∈ (:unsat, :unknown) && return status, Int[]
 
-    # TODO: check for correct initial letter
-    
-    results = reduce(vcat, parse_line.(output[2:end]))
-    pop!(results)  # remove final 0
+        output = filter(line -> !startswith(line, "c"), readlines(output))
 
-    return status, results
+        # TODO: check for correct initial letter
+
+        results = reduce(vcat, parse_line.(output[2:end]))
+        pop!(results)  # remove final 0
+        return status, results
+    end
 end
 
 
 
 """
-Check that the clause is satisfied by the assignments 
+Check that the clause is satisfied by the assignments
 in `results`
 """
 function satisfies(clause::Vector{Int}, results)
@@ -96,10 +96,9 @@ function satisfies(clause::Vector{Int}, results)
 end
 
 """
-Check that all clases in `p` are satisfied by the 
+Check that all clases in `p` are satisfied by the
 assignments in `results`
 """
 function satisfies(p, results)
     return all(satisfies.(p.clauses, Ref(results)))
 end
-
