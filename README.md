@@ -10,7 +10,7 @@ which uses [this Pluto notebook](docs/satisfiability_juliacon_2021.pluto.jl).
 See also the `examples` directory for basic usage. 
 
 
-The resulting SAT problem is solved, by default, using the `CryptoMiniSAT5` SAT solver, which is 
+The resulting SAT problem is solved, by default, using the [`CryptoMiniSAT5`](https://github.com/msoos/cryptominisat) SAT solver, which is 
 automatically installed.
 
 ## Author
