@@ -10,15 +10,8 @@ which uses [this Pluto notebook](docs/satisfiability_juliacon_2021.pluto.jl).
 See also the `examples` directory for basic usage. 
 
 
-
-Currently for actually solving the resulting SAT problem you need to install the `CryptoMiniSAT5` SAT solver, e.g. with
-
-`brew install cryptominisat`
-
-on Mac.
-
-In the future this will be installed automatically.
-
+The resulting SAT problem is solved, by default, using the `CryptoMiniSAT5` SAT solver, which is 
+automatically installed.
 
 ## Author
 
