@@ -2,22 +2,23 @@ using Symbolics: Term
 
 "Index mapping variables to integers"
 struct IndexDict
-    index::Dict{Sym, Int}
+    index::Dict{Num, Int}
 end
 
-IndexDict(vars::Vector{<:Sym}) = IndexDict(Dict(v => i for (i, v) in enumerate(vars)))
+IndexDict(vars::Vector{<:Num}) = IndexDict(Dict(v => i for (i, v) in enumerate(vars)))
 
 
 
 struct SymbolicSATProblem 
-    variables # ::Vector{<:Sym}
+    variables # ::Vector{<:Num}
     clauses # ::Vector{<:Term}
     index::IndexDict
     p::SATProblem
 end
 
 
-function process(d::IndexDict, var::Sym)
+function process(d::IndexDict, var::Symbolics.Sym)   # process a variable
+    @show d
     if !haskey(d.index, var)
         error("$var is not in the problem")
     end
@@ -28,25 +29,81 @@ end
  
 "Output a clause c from a Dict of variables c, as a vector of integers"
 function process(d::IndexDict, clause::Term)
+    
+    @show clause
+    @show Symbolics.istree(clause.val)
 
-    if clause.f == ¬
-        return [ -(d.index[clause.arguments[1]]) ]
+    if Symbolics.istree(clause.val)
+        term = clause.val
+        if term.f == ¬
+            return [ -(d.index[term.arguments[1]]) ]
 
-    elseif clause.f == ∨
-        return reduce(vcat, process.(Ref(d), clause.arguments))
+        elseif term.f == ∨
+            return reduce(vcat, process.(Ref(d), term.arguments))
 
-    else
-        error("Malformed")
+        else
+            error("$clause is malformed")
+        end
+
+    else  # variable
+        var = clause  
+        if !haskey(d.index, var)
+            error("$var is not in the problem")
+        end
+
+        return [ d.index[var] ]
     end
 
 end
 
-function process(d::IndexDict, clauses)
+function process(d::IndexDict, term::Symbolics.Term)
+    if term.f == ¬
+        return [ -(d.index[term.arguments[1]]) ]
+
+    elseif term.f == ∨
+        return reduce(vcat, process.(Ref(d), term.arguments))
+
+    else
+        error("$clause is malformed")
+    end
+end
+
+
+"Output a clause c from a Dict of variables c, as a vector of integers"
+function process(d::IndexDict, clause::Num)
+    
+    @show clause
+    @show Symbolics.istree(clause.val)
+
+    if Symbolics.istree(clause.val)
+        term = clause.val
+        if term.f == ¬
+            return [ -(d.index[term.arguments[1]]) ]
+
+        elseif term.f == ∨
+            return reduce(vcat, process.(Ref(d), term.arguments))
+
+        else
+            error("$clause is malformed")
+        end
+
+    else  # variable
+        var = clause  
+        if !haskey(d.index, var)
+            error("$var is not in the problem")
+        end
+
+        return [ d.index[var] ]
+    end
+
+end
+
+function process(d::IndexDict, clauses::Vector{Num})
     return process.(Ref(d.index), clauses)
 end
 
 
-function SymbolicSATProblem(variables::Vector{<:Sym}, symbolic_clauses)
+function SymbolicSATProblem(variables, symbolic_clauses)  # variables::Vector{<:Num}?
 
     d = IndexDict(variables)
 

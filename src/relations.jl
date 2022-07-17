@@ -18,72 +18,80 @@ y = DiscreteVariable(:y, 2:6)
 # BinaryRelation(==, x, y)
 # BinaryRelation(==, x, 1)
 
-# Use NodeVariables to break up binary relations like x + y ~ 3 and ternary such as x + y <= z
-struct NodeVariable <: Var
-    name
+# Node in the Internal Representation
+struct Node <: Var
     op 
     x
     y
-    domain
-    booleans
-    varmap
+    var   # DiscreteVariable
 end
 
-Base.show(io::IO, var::NodeVariable) = print(io, "$(var.name) = $(var.op)($(var.x), $(var.y))")
 
-find_domain(op, x, y) = sort(collect(Set([op(i, j) for i in domain(x) for j in domain(y)])))
+Base.show(io::IO, n::Node) = print(io, "$(n.var.name) = $(n.op)($(n.x), $(n.y))")
 
-domain(v::Var) = v.domain
-booleans(v::Var) = v.booleans
+Base.getindex(n::Node, i) = n.var[i]
+
+find_domain(op, x, y) = sort(collect(Set(op(i, j) for i in domain(x) for j in domain(y))))
+
+domain(v::Node) = domain(v.var)
+booleans(v::Node) = booleans(v.var)
+name(v::Node) = name(v.var)
 
 domain(x::Real) = x:x
 
 "All booleans inside an expression that must be added to the encoding"
-recursive_booleans(v::NodeVariable) = v.booleans ∪ booleans(v.x) ∪ booleans(v.y)
+recursive_booleans(v::Node) = booleans(v) ∪ booleans(v.x) ∪ booleans(v.y)
 
-function NodeVariable(op, x, y, name=gensym())
+function Node(op, x, y; name=gensym())
     domain = find_domain(op, x, y)
-    booleans = [Variable(name, i) for i ∈ indices(domain)]
-    varmap = Dict(i => v for (i, v) in zip(domain, booleans))
-    NodeVariable(name, op, x, y, domain, booleans, varmap)
+    
+    name = name
+    var = DiscreteVariable(name, domain)
+
+    @show var
+
+    return Node(op, x, y, var)
 end
 
 
 
-Base.:+(x::Var, y) = NodeVariable(+, x, y)
-Base.:+(x, y::Var) = NodeVariable(+, x, y)
+Base.:+(x::Var, y) = Node(+, x, y)
+Base.:+(x, y::Var) = Node(+, x, y)
 
-Base.:*(x::Var, y) = NodeVariable(*, x, y)
-Base.:*(x, y::Var) = NodeVariable(*, x, y)
-
-
-Base.:^(x::Var, y) = NodeVariable(^, x, y)
-Base.:^(x, y::Var) = NodeVariable(^, x, y)
+Base.:*(x::Var, y) = Node(*, x, y)
+Base.:*(x, y::Var) = Node(*, x, y)
 
 
-function clauses(var::NodeVariable)
+Base.:^(x::Var, y) = Node(^, x, y)
+Base.:^(x, y::Var) = Node(^, x, y)
+
+Base.:~(x::Var, y) = Node(~, x, y)
+Base.:~(x, y::Var) = Node(~, x, y)
+
+
+function clauses(var::Node)
 
     op = var.op
     x = var.x 
     y = var.y
 
-    clauses = exactly_one(var.booleans)
+    clauses = exactly_one(booleans(var))
 
     # deal with 2 + X
     if x isa Real 
-        for j in domain(var.y)
+        for j in domain(y)
             value = op(x, j)
             # y == j => var == op(x, j)
-            push!(clauses, ¬(y.varmap[j]) ∨ var.varmap[value])
+            push!(clauses, ¬(y[j]) ∨ var[value])
 
         end
    
     # deal with x + 2
     elseif y isa Real 
-        for i in domain(var.x)
+        for i in domain(x)
             value = op(i, y)
             # x == i => var == op(i, y)
-            push!(clauses, ¬(x.varmap[i]) ∨ var.varmap[value])
+            push!(clauses, ¬(x[i]) ∨ var[value])
 
         end
     
@@ -94,7 +102,7 @@ function clauses(var::NodeVariable)
             for j in domain(var.y)
                 value = op(i, j)
                 # x == i && y == j => var == op(i, j)
-                push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[j]) ∨ var.varmap[value])
+                push!(clauses, ¬(x[i]) ∨ ¬(y[j]) ∨ var[value])
             end
         end
 
@@ -122,7 +130,7 @@ function encode(rel::BinaryRelation{==, <:Var, <:Real})
         error("$y is not in the domain of $x")
     end
 
-    boolean = x.varmap[y]
+    boolean = x[y]
 
     return [boolean]
 end
@@ -134,7 +142,7 @@ function encode(rel::BinaryRelation{!=, <:Var, <:Real})
     y = rel.y
 
     if y ∈ domain(x)
-        boolean = ¬(x.varmap[y])
+        boolean = ¬(x[y])
     end
 
 
@@ -151,20 +159,20 @@ function encode(rel::BinaryRelation{==, <:Var, <:Var})
     for i in domain(x)
         if i in domain(y)
         # (x == i) => (y == i)  
-            push!(clauses, ¬(x.varmap[i]) ∨ (y.varmap[i]))
+            push!(clauses, ¬(x[i]) ∨ (y[i]))
         
         else
-            push!(clauses, ¬(x.varmap[i]))
+            push!(clauses, ¬(x[i]))
         end 
     end
 
     for i in domain(y)
         if i in domain(x)
         # (y == i) => (x == i)  
-            push!(clauses, ¬(y.varmap[i]) ∨ (x.varmap[i]))
+            push!(clauses, ¬(y[i]) ∨ (x[i]))
         
         else
-            push!(clauses, ¬(y.varmap[i]))
+            push!(clauses, ¬(y[i]))
         end
     end
 
@@ -183,7 +191,7 @@ function encode(rel::BinaryRelation{!=, <:Var, <:Var})
     for i in domain(x)
         if i in domain(y)
         # (x == i) => (y != i) 
-            push!(clauses, ¬(x.varmap[i]) ∨ ¬(y.varmap[i]))
+            push!(clauses, ¬(x[i]) ∨ ¬(y[i]))
         end
     end
 
@@ -385,11 +393,11 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
 
             lhs = constraint.lhs
 
-            op, new_args = parse_expression(varmap, constraint.rhs)   # makes a NodeVariable
+            op, new_args = parse_expression(varmap, constraint.rhs)   # makes a Node
 
             # @show op, new_args 
 
-            variable = NodeVariable(op, new_args[1], new_args[2], lhs)
+            variable = Node(op, new_args[1], new_args[2], name=lhs)
             
             push!(variables, variable)
             push!(varmap, lhs => variable)
@@ -416,10 +424,10 @@ function encode(prob::DiscreteCSP)
     variables = Any[prob.original_vars; prob.additional_vars]
     
 
-    domains = Dict(v.name => v.domain for v in variables)
+    domains = Dict(name(v) => domain(v) for v in variables)
 
     for var in variables
-        append!(all_variables, var.booleans)
+        append!(all_variables, booleans(var))
         append!(all_clauses, clauses(var))
     end
 
@@ -430,10 +438,11 @@ function encode(prob::DiscreteCSP)
         append!(all_clauses, encode(constraint))
     end
 
-    # @show all_variables 
-    # @show all_clauses 
+    @show identity.(all_variables)
+    @show identity.(all_clauses)
 
     return SymbolicSATProblem(identity.(all_variables), identity.(all_clauses))
+    # identity.(...) reduces to the correct type 
 end
 
 
