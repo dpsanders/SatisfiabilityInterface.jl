@@ -12,35 +12,43 @@ end
 BinaryRelation{O}(x::X, y::Y) where {O,X,Y} = BinaryRelation{O,X,Y}(x, y)
 
 
-x = DiscreteVariable(:x, 1:5)
-y = DiscreteVariable(:y, 2:6)
-
-# BinaryRelation(==, x, y)
-# BinaryRelation(==, x, 1)
-
 # BinaryNode in the Internal Representation
-struct BinaryNode <: Var
+
+abstract type Node <: Var end 
+
+struct BinaryNode <: Node
     op 
     x
     y
     var   # DiscreteVariable
 end
 
+struct UnaryNode <: Node
+    op 
+    x
+    var   # DiscreteVariable
+end
+
 
 Base.show(io::IO, n::BinaryNode) = print(io, "$(n.var.name) = $(n.op)($(n.x), $(n.y))")
-
-Base.getindex(n::BinaryNode, i) = n.var[i]
+Base.show(io::IO, n::UnaryNode) = print(io, "$(n.var.name) = $(n.op)($(n.x))")
 
 find_domain(op, x, y) = sort(collect(Set(op(i, j) for i in domain(x) for j in domain(y))))
+find_domain(op, x) = sort(collect(Set(op(i) for i in domain(x))))
 
-domain(v::BinaryNode) = domain(v.var)
-booleans(v::BinaryNode) = booleans(v.var)
-name(v::BinaryNode) = name(v.var)
+
+Base.getindex(n::Node, i) = n.var[i]
+
+domain(v::Node) = domain(v.var)
+booleans(v::Node) = booleans(v.var)
+name(v::Node) = name(v.var)
 
 domain(x::Real) = x:x
 
 "All booleans inside an expression that must be added to the encoding"
 recursive_booleans(v::BinaryNode) = booleans(v) ∪ booleans(v.x) ∪ booleans(v.y)
+recursive_booleans(v::UnaryNode) = booleans(v) ∪ booleans(v.x)
+
 
 function BinaryNode(op, x, y; name=gensym())
     domain = find_domain(op, x, y)
@@ -51,6 +59,18 @@ function BinaryNode(op, x, y; name=gensym())
     @show var
 
     return BinaryNode(op, x, y, var)
+end
+
+
+function UnaryNode(op, x; name=gensym())
+    domain = find_domain(op, x)
+    
+    name = name
+    var = DiscreteVariable(name, domain)
+
+    @show var
+
+    return UnaryNode(op, x, var)
 end
 
 
@@ -67,6 +87,9 @@ Base.:^(x, y::Var) = BinaryNode(^, x, y)
 
 Base.:~(x::Var, y) = BinaryNode(~, x, y)
 Base.:~(x, y::Var) = BinaryNode(~, x, y)
+
+Base.:abs(x::Var) = UnaryNode(abs, x)
+Base.:sign(x::Var) = UnaryNode(sin, x)
 
 
 function clauses(var::BinaryNode)
@@ -113,6 +136,24 @@ function clauses(var::BinaryNode)
 end
 
 
+
+function clauses(var::UnaryNode)
+
+    op = var.op
+    x = var.x 
+
+    clauses = exactly_one(booleans(var))
+
+    for j in domain(x)
+        value = op(j)
+            
+        push!(clauses, ¬(x[j]) ∨ var[value])
+
+    end
+   
+    return clauses
+
+end
 
 
 
@@ -211,7 +252,18 @@ function parse_expression(varmap, ex)
     return op, new_args
 end
 
-parse_expression(varmap, ex::Term) = varmap[ex]
+function parse_expression(varmap, ex::Term) 
+    if ex.f == getindex 
+        return varmap[ex]
+    else
+        op = operation(ex)
+        args = arguments(ex)
+    
+        new_args = parse_expression.(Ref(varmap), args)
+    
+        return op, new_args
+    end
+end
 parse_expression(varmap, ex::Sym) = varmap[ex]
 parse_expression(varmap, ex::Num) = parse_expression(varmap, value(ex))
 parse_expression(varmap, ex::Real) = ex
@@ -395,9 +447,16 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
 
             op, new_args = parse_expression(varmap, constraint.rhs)   # makes a BinaryNode
 
-            # @show op, new_args 
+            @show op, new_args 
 
-            variable = BinaryNode(op, new_args[1], new_args[2], name=lhs)
+            if length(new_args) == 2
+                variable = BinaryNode(op, new_args[1], new_args[2], name=lhs)
+            elseif length(new_args) == 1
+                variable = UnaryNode(op, new_args[1], name=lhs)
+
+            else
+                error("Can't handle $constraint")
+            end
             
             push!(variables, variable)
             push!(varmap, lhs => variable)
