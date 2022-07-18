@@ -79,8 +79,8 @@ function process(constraint)
 
     end
 
-    # @show new_constraints
-    # @show op, lhs, rhs
+    # # @show new_constraints
+    # # @show op, lhs, rhs
     push!(new_constraints, op(lhs, rhs))
 
     return new_constraints
@@ -113,8 +113,8 @@ function parse_constraint!(domains, ex)
         new_constraints = process(expr)
         
         println()
-        # @show expr
-        # @show new_constraints
+        # # @show expr
+        # # @show new_constraints
 
     end
 

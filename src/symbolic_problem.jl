@@ -18,7 +18,7 @@ end
 
 
 function process(d::IndexDict, var::Symbolics.Sym)   # process a variable
-    @show d
+    # @show d
     if !haskey(d.index, var)
         error("$var is not in the problem")
     end
@@ -30,8 +30,8 @@ end
 "Output a clause c from a Dict of variables c, as a vector of integers"
 function process(d::IndexDict, clause::Term)
     
-    @show clause
-    @show Symbolics.istree(clause.val)
+    # @show clause
+    # @show Symbolics.istree(clause.val)
 
     if Symbolics.istree(clause.val)
         term = clause.val
@@ -58,7 +58,7 @@ end
 
 function process(d::IndexDict, term::Symbolics.Term)
     if term.f == ¬
-        return [ -(d.index[term.arguments[1]]) ]
+        return [ -(d.index[term.arguments[1]]) ]        
 
     elseif term.f == ∨
         return reduce(vcat, process.(Ref(d), term.arguments))
@@ -72,8 +72,8 @@ end
 "Output a clause c from a Dict of variables c, as a vector of integers"
 function process(d::IndexDict, clause::Num)
     
-    @show clause
-    @show Symbolics.istree(clause.val)
+    # @show clause
+    # @show Symbolics.istree(clause.val)
 
     if Symbolics.istree(clause.val)
         term = clause.val
@@ -111,10 +111,10 @@ function SymbolicSATProblem(variables, symbolic_clauses)  # variables::Vector{<:
 
     p = SATProblem(length(variables), clauses)
 
-    # @show variables
-    # @show symbolic_clauses
-    # @show d 
-    # @show p 
+    # # @show variables
+    # # @show symbolic_clauses
+    # # @show d 
+    # # @show p 
 
     return SymbolicSATProblem(variables, symbolic_clauses, d, p)
 end

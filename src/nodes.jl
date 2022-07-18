@@ -43,7 +43,7 @@ function BinaryNode(op, x, y; name=gensym())
     name = name
     var = DiscreteVariable(name, domain)
 
-    @show var
+    # @show var
 
     return BinaryNode(op, x, y, var)
 end
@@ -55,7 +55,7 @@ function UnaryNode(op, x; name=gensym())
     name = name
     var = DiscreteVariable(name, domain)
 
-    @show var
+    # @show var
 
     return UnaryNode(op, x, var)
 end

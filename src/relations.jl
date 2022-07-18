@@ -113,6 +113,58 @@ function encode(rel::BinaryRelation{<=, <:Var, <:Real})
     end
 
     return clauses
+end
+
+"Encode relation like x < 3"
+function encode(rel::BinaryRelation{<, <:Var, <:Real})
+
+    x = rel.x 
+    y = rel.y
+
+    clauses = []
+
+    for i in domain(x)
+        if i >= y  # not possible
+            push!(clauses, ¬(x[i]))
+        end
+    end
+
+    return clauses
 
 end
 
+
+"Encode relation like x >= 3"
+function encode(rel::BinaryRelation{>=, <:Var, <:Real})
+
+    x = rel.x 
+    y = rel.y
+
+    clauses = []
+
+    for i in domain(x)
+        if i < y  # not possible
+            push!(clauses, ¬(x[i]))
+        end
+    end
+
+    return clauses
+end
+
+"Encode relation like x > 3"
+function encode(rel::BinaryRelation{>, <:Var, <:Real})
+
+    x = rel.x 
+    y = rel.y
+
+    clauses = []
+
+    for i in domain(x)
+        if i <= y  # not possible
+            push!(clauses, ¬(x[i]))
+        end
+    end
+
+    return clauses
+
+end

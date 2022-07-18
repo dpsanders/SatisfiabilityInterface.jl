@@ -16,7 +16,7 @@ end
 function ConstraintSatisfactionProblem(constraints)
 
     domains, new_constraints, additional_vars = parse_constraints(constraints)
-    @show keys(domains)
+    # # @show keys(domains)
     vars = sort(identity.(keys(domains)))
     additional_vars = sort(identity.(additional_vars))
 
@@ -49,17 +49,17 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
     for constraint in prob.constraints 
         constraint = value(constraint)
 
-        @show constraint
+        # # @show constraint
 
         if constraint isa Assignment 
 
             lhs = constraint.lhs
 
-            @show lhs 
+            # # @show lhs 
 
             op, new_args = parse_expression(varmap, constraint.rhs)   # makes a BinaryNode
 
-            @show op, new_args 
+            # @show op, new_args 
 
             if length(new_args) == 2
                 variable = BinaryNode(op, new_args[1], new_args[2], name=lhs)
@@ -74,7 +74,7 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
             push!(varmap, lhs => variable)
 
         else
-            # @show constraint
+            # # @show constraint
             push!(new_constraints, parse_relation(varmap, constraint))
         end
     end
@@ -102,15 +102,15 @@ function encode(prob::DiscreteCSP)
         append!(all_clauses, clauses(var))
     end
 
-    # @show prob.constraints
+    # # @show prob.constraints
 
     for constraint in prob.constraints 
-        # @show constraint
+        # # @show constraint
         append!(all_clauses, encode(constraint))
     end
 
-    @show identity.(all_variables)
-    @show identity.(all_clauses)
+    # @show identity.(all_variables)
+    # @show identity.(all_clauses)
 
     return SymbolicSATProblem(identity.(all_variables), identity.(all_clauses))
     # identity.(...) reduces to the correct type 

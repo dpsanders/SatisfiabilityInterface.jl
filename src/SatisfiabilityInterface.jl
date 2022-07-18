@@ -11,6 +11,7 @@ export DiscreteVariable, ConstraintSatisfactionProblem, DiscreteCSP, SymbolicSAT
 export read_cnf, SATProblem
 export satisfies
 export encode, solve, all_solutions
+export minimize, maximize
 
 # functions to be extend:
 import Base: push!
@@ -28,5 +29,6 @@ include("parsing.jl")
 
 include("relations.jl")
 include("CSP.jl")
+include("optimize.jl")
 
 end
