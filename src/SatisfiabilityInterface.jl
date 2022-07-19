@@ -21,9 +21,9 @@ include("discrete_variables.jl")
 
 include("sat_problem.jl")
 include("symbolic_problem.jl")
-include("MOI_wrapper.jl")
 include("read_cnf.jl")
 include("solver.jl")
+include("MOI_wrapper.jl")
 # include("encode.jl")
 
 include("relations.jl")
