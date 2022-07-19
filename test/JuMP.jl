@@ -1,7 +1,7 @@
 using JuMP, SatisfiabilityInterface
 
 @testset "JuMP" begin
-    model = JuMP.Model(SatisfiabilityInterface.Optimizer{Bool})
+    model = JuMP.Model(SatisfiabilityInterface.Optimizer)
     @variable(model, x, Bin)
     @variable(model, y, Bin)
     @variable(model, z, Bin)
