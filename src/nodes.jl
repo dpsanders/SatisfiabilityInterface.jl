@@ -78,6 +78,23 @@ Base.:~(x, y::Var) = BinaryNode(~, x, y)
 Base.:abs(x::Var) = UnaryNode(abs, x)
 Base.:sign(x::Var) = UnaryNode(sin, x)
 
+# delta(x, y) is 1 iff x == y
+# @register_symbolic delta(x::Num, y::Num) false
+# @register_symbolic delta(x::Num, y::Int) false
+
+# @register_symbolic delta(x::Num, y::Int) false
+
+@register_symbolic delta(x) 
+
+
+# delta(x::Int, y::Int) = x == y ? 1 : 0
+delta(x::Var) = UnaryNode(delta, x)
+
+delta(x::Int) = x == 0 ? 1 : 0
+
+
+
+
 
 function clauses(var::BinaryNode)
 

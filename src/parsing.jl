@@ -112,7 +112,7 @@ function parse_constraint!(domains, ex)
     else
         new_constraints = process(expr)
         
-        println()
+        # println()
         # # @show expr
         # # @show new_constraints
 

@@ -28,33 +28,33 @@ end
 
  
 "Output a clause c from a Dict of variables c, as a vector of integers"
-function process(d::IndexDict, clause::Term)
+# function process(d::IndexDict, clause::Term)
     
-    # @show clause
-    # @show Symbolics.istree(clause.val)
+#     # @show clause
+#     # @show Symbolics.istree(clause.val)
 
-    if Symbolics.istree(clause.val)
-        term = clause.val
-        if term.f == ¬
-            return [ -(d.index[term.arguments[1]]) ]
+#     if Symbolics.istree(clause.val)
+#         term = clause.val
+#         if term.f == ¬
+#             return [ -(d.index[term.arguments[1]]) ]
 
-        elseif term.f == ∨
-            return reduce(vcat, process.(Ref(d), term.arguments))
+#         elseif term.f == ∨
+#             return reduce(vcat, process.(Ref(d), term.arguments))
 
-        else
-            error("$clause is malformed")
-        end
+#         else
+#             error("$clause is malformed")
+#         end
 
-    else  # variable
-        var = clause  
-        if !haskey(d.index, var)
-            error("$var is not in the problem")
-        end
+#     else  # variable
+#         var = clause  
+#         if !haskey(d.index, var)
+#             error("$var is not in the problem")
+#         end
 
-        return [ d.index[var] ]
-    end
+#         return [ d.index[var] ]
+#     end
 
-end
+# end
 
 function process(d::IndexDict, term::Symbolics.Term)
     if term.f == ¬

@@ -5,13 +5,13 @@ using Symbolics: Variable, Sym
 using Symbolics: Assignment, get_variables, operation, arguments, value, istree
 using CryptoMiniSat_jll
 using ReversePropagation
-# using ReversePropagation
 
 export DiscreteVariable, ConstraintSatisfactionProblem, DiscreteCSP, SymbolicSATProblem, SATProblem
 export read_cnf, SATProblem
 export satisfies
 export encode, solve, all_solutions
 export minimize, maximize
+export delta
 
 # functions to be extend:
 import Base: push!
