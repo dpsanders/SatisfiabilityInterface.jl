@@ -1,7 +1,13 @@
 using JuMP, SatisfiabilityInterface
+import Kissat_jll
 
 @testset "JuMP" begin
-    model = JuMP.Model(SatisfiabilityInterface.Optimizer)
+    solver = SatisfiabilityInterface.ExternalSATSolver(
+        Kissat_jll.kissat,
+        "",
+        Dict(10 => :sat, 15 => :unknown, 20 => :unsat),
+    )
+    model = JuMP.Model(() -> SatisfiabilityInterface.Optimizer(solver))
     @variable(model, x, Bin)
     @variable(model, y, Bin)
     @variable(model, z, Bin)
@@ -14,7 +20,10 @@ using JuMP, SatisfiabilityInterface
     @test raw_status(model) == "sat"
     @test termination_status(model) == MOI.OPTIMAL
     @test primal_status(model) == MOI.FEASIBLE_POINT
-    @test value(x) == 0.0
-    @test value(y) == 1.0
-    @test value(z) == 0.0
+    s = round.(Int, value.([x, y, z])) .== 1
+    @test s[1] | s[2] | s[3]
+    @test !s[1] | s[2] | s[3]
+    @test !s[1] | !s[2]
+    @test !s[2] | !s[3]
+    @test s[1] | !s[3]
 end

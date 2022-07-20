@@ -3,6 +3,7 @@ import MathOptInterface
 const MOI = MathOptInterface
 
 mutable struct Optimizer{T} <: MOI.AbstractOptimizer
+    solver::Union{Nothing,ExternalSATSolver}
     problem::SATProblem
     status::Symbol
     results::Vector{Int}
@@ -11,12 +12,20 @@ end
 
 const NOT_CALLED = :notcalled
 
-function Optimizer{T}() where {T}
-    return Optimizer{T}(SATProblem(0, Vector{Int}[]), NOT_CALLED, Int[], Bool[])
+function Optimizer{T}(
+    solver::Union{Nothing,ExternalSATSolver} = nothing,
+) where {T}
+    return Optimizer{T}(
+        solver,
+        SATProblem(0, Vector{Int}[]),
+        NOT_CALLED,
+        Int[],
+        Bool[],
+    )
 end
 
 # JuMP will expects `VariablePrimal` to return `Float64`
-Optimizer() = Optimizer{Float64}()
+Optimizer(solver = nothing) = Optimizer{Float64}(solver)
 
 function MOI.empty!(model::Optimizer)
     model.problem.num_variables = 0
@@ -92,9 +101,14 @@ function MOI.add_constraint(
     index = length(model.problem.clauses)
     return MOI.ConstraintIndex{typeof(func),typeof(set)}(index)
 end
+
 function MOI.optimize!(model::Optimizer)
     @assert all(model.is_zeroone)
-    model.status, model.results = solve(model.problem)
+    model.status, model.results = if model.solver === nothing
+        solve(model.problem)
+    else
+        solve(model.problem; solver = model.solver)
+    end
     return
 end
 
