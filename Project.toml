@@ -11,10 +11,13 @@ ReversePropagation = "527681c1-8309-4d3f-8790-caf822a419ba"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
-JuMP = "0.21.8"
-MathOptInterface = "0.9.22"
+CommonSolve = "0.2"
+CryptoMiniSat_jll = "5.8.1"
+JuMP = "1"
+MathOptInterface = "1"
+ReversePropagation = "0.1"
 Symbolics = "1"
-julia = "1"
+julia = "1.6"
 
 [extras]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
