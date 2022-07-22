@@ -1,19 +1,9 @@
-
-
-
-
-
-
 struct BinaryRelation{O, S, T}
     x::S
     y::T 
 end
 
 BinaryRelation{O}(x::X, y::Y) where {O,X,Y} = BinaryRelation{O,X,Y}(x, y)
-
-
-# Base.:(==)(v::Var, w) = BinaryRelation{==}(v, w)
-# Base.:(<=)(v::Var, w) = BinaryRelation{<=}(v, w)
 
 
 "Encode relation like x == 1"
