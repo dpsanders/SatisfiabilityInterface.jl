@@ -36,7 +36,7 @@ function minimize(orig_constraints, v)
     value = sol[2][v]
 
     # println("\n")
-    # # @show value
+    @show value
 
     push!(constraints, v < value)
     prob2 = DiscreteCSP(constraints)

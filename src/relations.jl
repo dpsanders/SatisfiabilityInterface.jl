@@ -12,19 +12,16 @@ end
 BinaryRelation{O}(x::X, y::Y) where {O,X,Y} = BinaryRelation{O,X,Y}(x, y)
 
 
-
-
-
-Base.:(==)(v::Var, w) = BinaryRelation{==}(v, w)
-Base.:(<=)(v::Var, w) = BinaryRelation{<=}(v, w)
+# Base.:(==)(v::Var, w) = BinaryRelation{==}(v, w)
+# Base.:(<=)(v::Var, w) = BinaryRelation{<=}(v, w)
 
 
 "Encode relation like x == 1"
-function encode(rel::BinaryRelation{==, <:Var, <:Real})
+function encode(rel::BinaryRelation{Op, S, T}) where {Op, S, T}
+    return encode(Op, rel.x, rel.y)
+end
 
-    x = rel.x 
-    y = rel.y
-
+function encode(::typeof(==), x::Var, y::Real)
     if y ∉ domain(x)
         error("$y is not in the domain of $x")
     end
@@ -35,10 +32,7 @@ function encode(rel::BinaryRelation{==, <:Var, <:Real})
 end
 
 "Encode relation like x != 1"
-function encode(rel::BinaryRelation{!=, <:Var, <:Real})
-
-    x = rel.x 
-    y = rel.y
+function encode(::typeof(!=), x::Var, y::Real)
 
     if y ∈ domain(x)
         boolean = ¬(x[y])
@@ -49,10 +43,8 @@ function encode(rel::BinaryRelation{!=, <:Var, <:Real})
 end
 
 "Encode relation like x == y"
-function encode(rel::BinaryRelation{==, <:Var, <:Var})
-    x = rel.x 
-    y = rel.y 
-
+function encode(::typeof(==), x::Var, y::Var)
+    
     clauses = []
 
     for i in domain(x)
@@ -81,10 +73,8 @@ end
 
 
 
-function encode(rel::BinaryRelation{!=, <:Var, <:Var})
-    x = rel.x 
-    y = rel.y 
-
+function encode(::typeof(!=), x::Var, y::Var)
+    
     clauses = []
 
     for i in domain(x)
@@ -99,10 +89,7 @@ function encode(rel::BinaryRelation{!=, <:Var, <:Var})
 end
 
 "Encode relation like x <= 3"
-function encode(rel::BinaryRelation{<=, <:Var, <:Real})
-
-    x = rel.x 
-    y = rel.y
+function encode(::typeof(<=), x::Var, y::Real)
 
     clauses = []
 
@@ -116,10 +103,7 @@ function encode(rel::BinaryRelation{<=, <:Var, <:Real})
 end
 
 "Encode relation like x < 3"
-function encode(rel::BinaryRelation{<, <:Var, <:Real})
-
-    x = rel.x 
-    y = rel.y
+function encode(::typeof(<), x::Var, y::Real)
 
     clauses = []
 
@@ -135,10 +119,7 @@ end
 
 
 "Encode relation like x >= 3"
-function encode(rel::BinaryRelation{>=, <:Var, <:Real})
-
-    x = rel.x 
-    y = rel.y
+function encode(::typeof(>=), x::Var, y::Real)
 
     clauses = []
 
@@ -152,10 +133,7 @@ function encode(rel::BinaryRelation{>=, <:Var, <:Real})
 end
 
 "Encode relation like x > 3"
-function encode(rel::BinaryRelation{>, <:Var, <:Real})
-
-    x = rel.x 
-    y = rel.y
+function encode(::typeof(>), x::Var, y::Real)
 
     clauses = []
 
