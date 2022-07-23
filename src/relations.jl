@@ -126,10 +126,10 @@ function encode(::typeof(<=), x::Var, y::Var)
     clauses = []
 
     for i in domain(x)
-        if i in domain(y)
+        for j in domain(y)
 
-            if x > y  # not possible
-                push!(clauses, ¬(x[i]) ∨ ¬(y[i]))
+            if i > j  # not possible
+                push!(clauses, ¬(x[i]) ∨ ¬(y[j]))
             end
 
         end
@@ -144,10 +144,10 @@ function encode(::typeof(<), x::Var, y::Var)
     clauses = []
 
     for i in domain(x)
-        if i in domain(y)
+        for j in domain(y)
 
-            if x >= y  # not possible
-                push!(clauses, ¬(x[i]) ∨ ¬(y[i]))
+            if i >= j  # not possible
+                push!(clauses, ¬(x[i]) ∨ ¬(y[j]))
             end
 
         end
@@ -162,6 +162,6 @@ function encode(::typeof(>=), x::Var, y::Var)
 end
 
 "Encode relation like x > y"
-function encode(::typeof(>=), x::Var, y::Var)
+function encode(::typeof(>), x::Var, y::Var)
     return encode(<, y, x)
 end
