@@ -80,12 +80,12 @@ function encode(::typeof(!=), x::Var, y::Var)
 end
 
 "Encode relation like x <= 3"
-function encode(::typeof(<=), x::Var, y::Real)
+function encode(::typeof(<=), x::Var, j::Real)
 
     clauses = []
 
     for i in domain(x)
-        if i > y  # not possible
+        if i > j  # not possible
             push!(clauses, ¬(x[i]))
         end
     end
@@ -94,18 +94,18 @@ function encode(::typeof(<=), x::Var, y::Real)
 end
 
 "Encode relation like x < 3"
-function encode(::typeof(<), x::Var, y::Real)
-    return encode(<=, x, y-1)
+function encode(::typeof(<), x::Var, j::Real)
+    return encode(<=, x, j-1)
 end
 
 
 "Encode relation like x >= 3"
-function encode(::typeof(>=), x::Var, y::Real)
+function encode(::typeof(>=), x::Var, j::Real)
 
     clauses = []
 
     for i in domain(x)
-        if i < y  # not possible
+        if i < j  # not possible
             push!(clauses, ¬(x[i]))
         end
     end
@@ -114,9 +114,9 @@ function encode(::typeof(>=), x::Var, y::Real)
 end
 
 "Encode relation like x > 3"
-function encode(::typeof(>), x::Var, y::Real)
+function encode(::typeof(>), x::Var, j::Real)
 
-    return encode(>=, x, y+1)
+    return encode(>=, x, j+1)
 
 end
 
