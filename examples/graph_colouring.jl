@@ -76,7 +76,7 @@ status==:sat
 k = 3
 colours = [:red, :green, :yellow, :blue, :black][1:k]
 
-c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
+c = [Symbolics.variable(:c, i)) for i in 1:length(V)]   # colour variables
 
 
 constraints = 

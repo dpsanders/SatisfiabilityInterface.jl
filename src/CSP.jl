@@ -148,7 +148,7 @@ function all_solutions(prob::DiscreteCSP)
         return sat_solutions 
     end
 
-    solutions = []
+    solutions = Dict{Num, Int}[]
 
     for solution in sat_solutions
         push!(solutions, decode(prob, decode(prob2, solution)))

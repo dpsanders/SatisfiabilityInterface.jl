@@ -1,7 +1,7 @@
 module SatisfiabilityInterface
 
 using Symbolics
-using Symbolics: Variable, Sym
+using Symbolics: variable, Sym
 using Symbolics: Assignment, get_variables, operation, arguments, value, istree
 using CryptoMiniSat_jll
 using ReversePropagation
@@ -29,6 +29,6 @@ include("parsing.jl")
 
 include("relations.jl")
 include("CSP.jl")
-include("optimize.jl")
+# include("optimize.jl")
 
 end

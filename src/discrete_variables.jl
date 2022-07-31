@@ -52,7 +52,7 @@ function exactly_one(vars)
     return clauses
 end
 
-clauses(x::DiscreteVariable) = exactly_one(x.booleans)
+clauses(x::DiscreteVariable) = exactly_one(booleans(x))
    
 
 # domain(x::Var) = x.domain
@@ -61,7 +61,7 @@ clauses(x::DiscreteVariable) = exactly_one(x.booleans)
 
 
 function decode(varmap, x::Var)
-    values = [varmap[v] for v in x.booleans]
+    values = [varmap[v] for v in booleans(x)]
 
     num_true = count(values)
 
@@ -69,6 +69,7 @@ function decode(varmap, x::Var)
         error("Variable $x has not been successfully solved: values $(x.vars .=> values)")
     end
 
-    return x.domain[findfirst(values)]
+    which = findfirst(values)  # find first (and only) one which is true
+    return x.domain[which]  # map it back to the domain
 end
 
