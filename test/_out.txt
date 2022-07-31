@@ -24,7 +24,7 @@ c clause size stats. size3: 0 size4: 0 size5: 0 larger: 81
 c [find&init matx] XORs not updated, and either (XORs are not detached OR assumps does not contain clash variable) -> or not performing matrix init
 c [polar] polar mode: auto branch strategy num: 0 branch strategy: VSIDSX
 c ------- FINAL TOTAL SEARCH STATS ---------
-c UIP search time          : 0.00        (0.17      % time)
+c UIP search time          : 0.00        (0.21      % time)
 c restarts                 : 1           (0.00      confls per restart)
 c blocked restarts         : 0           (0.00      per normal restart)
 c time                     : 0.00        
