@@ -12,25 +12,25 @@ end
 
 
 "Encode relation like x == 1"
-function encode(::typeof(==), x::Var, y::Real)
-    if y ∉ domain(x)
-        error("$y is not in the domain of $x")
+function encode(::typeof(==), x::Var, j::Real)
+    if j ∉ domain(x)
+        error("$j is not in the domain of $x")
     end
 
-    boolean = x[y]
+    boolean = x[j]
 
     return [boolean]
 end
 
 "Encode relation like x != 1"
-function encode(::typeof(!=), x::Var, y::Real)
+function encode(::typeof(!=), x::Var, j::Real)
 
-    if y ∈ domain(x)
-        boolean = ¬(x[y])
+    if j ∈ domain(x)
+        boolean = ¬(x[j])
+        return [boolean]
     end
 
-
-    return [boolean]
+    return []
 end
 
 "Encode relation like x == y"
