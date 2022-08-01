@@ -1,5 +1,5 @@
 
-using SatisfiabilityInterface, Symbolics
+using Revise, SatisfiabilityInterface, Symbolics
 
 "Constraints representing different colours for each edge of a graph"
 different_colours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
@@ -76,7 +76,7 @@ status==:sat
 k = 3
 colours = [:red, :green, :yellow, :blue, :black][1:k]
 
-c = [Num(Variable(:c, i)) for i in 1:length(V)]   # colour variables
+c = [Symbolics.variable(:c, i)) for i in 1:length(V)]   # colour variables
 
 
 constraints = 
@@ -97,3 +97,47 @@ solve(prob2)
 k = 3
 
 
+
+
+
+
+
+
+
+######### Count number of each colour 
+# V = [1, 2, 3]; E = [(1, 2), (2, 3)];
+# V = [1, 2, 3]; E = [(1, 2), (2, 3), (1, 3)];
+
+# k = 2; colours = [:red, :green, :yellow, :blue, :black][1:k]
+
+# ring graph:
+m = 11
+V = 1:m
+E = [(i, mod1((i+1), m)) for i in 1:m]
+
+
+colours = 1:5
+
+
+n = [Symbolics.variable(:n, i) for i in 1:length(colours)]
+c = [Symbolics.variable(:c, i) for i in 1:length(V)]
+
+@variables num_colours
+
+constraints = [
+    [c[i] ∈ colours for i in 1:length(V)]
+    [n[i] ∈ 0:20 for i in 1:length(colours)]
+
+    num_colours ∈ 0:10
+
+    [c[i] ≠ c[j] for (i, j) in E]  #  different_colours(E, c)
+
+    [n[j] == sum(delta(c[i] - j) for i in 1:length(V)) for j in 1:length(colours)]
+
+    num_colours == sum(sign(abs(n[j])) for j in 1:length(colours))
+    # sign(abs(n)) gives 0 if n == 0 and 1 if n > 0
+]
+
+solve(DiscreteCSP(constraints))
+
+minimize(constraints, num_colours)

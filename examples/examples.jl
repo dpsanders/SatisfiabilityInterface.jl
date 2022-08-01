@@ -71,7 +71,8 @@ vars = @variables x, y, z
 
 s = [-7, -3, -2, 5, 8]
 n = length(s)
-x = [Num(Variable(:x, i)) for i in 1:n]
+x = [Symbolics.variable(:x, i)) for i in 1:n]
+# @variables x[1:n]
 
 constraints = [
     [x[i] ∈ (0:1) for i in 1:n]
@@ -103,7 +104,7 @@ all_solutions(prob)
 ## Example from https://github.com/newptcai/BeeEncoder.jl
 
 function make_vector(name::Symbol, range)
-    return Num.(Variable.(name, range))
+    return variable.(name, range)
 end
 
 @variables x, y, z, w

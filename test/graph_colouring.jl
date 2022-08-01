@@ -1,5 +1,6 @@
 using SatisfiabilityInterface
 using Symbolics
+using Test
 
 different_neighbours(E, c) = [c[i] ≠ c[j] for (i, j) in E]
 
@@ -25,44 +26,46 @@ function graph_colouring_problem(V, E, k=3)
 end
 
 
-@testset "Graph colouring" begin
-            
-    V = [1, 2, 3]  # vertices
-    E = [(1, 2), (2, 3)]  # edges
-
-    prob = graph_colouring_problem(V, E, 2)
-    status, results = solve(prob)
-
-    @test status==:sat
-
-    ks = sort(collect(keys(prob.varmap)))
-    colours = [results[k] for k in ks]
-
-    @test all(different_neighbours(E, colours))
-end
-
-@testset "Ring graph" begin
-
-    function ring_graph(n=11)
-        V = 1:n
-        E = [(i, mod1((i+1), n)) for i in 1:n]
+@testset "Graph colouring" verbose=true begin
         
-        return V, E
+    @testset begin "Linear graph"
+        V = [1, 2, 3]  # vertices
+        E = [(1, 2), (2, 3)]  # edges
+
+        prob = graph_colouring_problem(V, E, 2)
+        status, results = solve(prob)
+
+        @test status==:sat
+
+        ks = sort(collect(keys(prob.varmap)))
+        colours = [results[k] for k in ks]
+
+        @test all(different_neighbours(E, colours))
     end
 
-    V, E = ring_graph(11)
+    @testset "Ring graph" begin
 
-    prob = graph_colouring_problem(V, E, 2)
-    status, results = solve(prob)
-    @test status==:unsat
+        function ring_graph(n=11)
+            V = 1:n
+            E = [(i, mod1((i+1), n)) for i in 1:n]
+            
+            return V, E
+        end
 
-    prob = graph_colouring_problem(V, E, 3)
-    status, results = solve(prob)
-    @test status==:sat
+        V, E = ring_graph(11)
 
-    ks = sort(collect(keys(prob.varmap)))
-    colours = [results[k] for k in ks]
-    
-    @test all(different_neighbours(E, colours))
+        prob = graph_colouring_problem(V, E, 2)
+        status, results = solve(prob)
+        @test status==:unsat
+
+        prob = graph_colouring_problem(V, E, 3)
+        status, results = solve(prob)
+        @test status==:sat
+
+        ks = sort(collect(keys(prob.varmap)))
+        colours = [results[k] for k in ks]
+        
+        @test all(different_neighbours(E, colours))
+    end
 
 end

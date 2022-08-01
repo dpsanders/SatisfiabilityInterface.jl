@@ -31,7 +31,9 @@ Base.push!(p::SATProblem, clause) = push!(p.clauses, clause)
 ban!(p::SATProblem, clause) = push!(p, .-(clause))
 
 
-function all_solutions(p::SATProblem)
+function all_solutions(orig_p::SATProblem)
+
+    p = deepcopy(orig_p)
 
     solns = []
     status = :sat

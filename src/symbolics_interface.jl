@@ -1,19 +1,19 @@
 
 
-@register ∨(x, y)   # \wedge
-@register ∧(x, y)   # \vee
-@register ¬(x)      # \neg
+@register_symbolic ∨(x, y) false   # \wedge
+@register_symbolic ∧(x, y) false   # \vee
+@register_symbolic ¬(x) false      # \neg
 
-# @register ∨(x...)
-# @register ∨(x::AbstractVector{T} where T)
+# @register_symbolic ∨(x...)
+# @register_symbolic ∨(x::AbstractVector{T} where T)
 
 const DiscreteTypes = Union{Integer, Symbol}
 
-@register Base.:∈(x, y::AbstractRange{T} where T<:DiscreteTypes)
-@register Base.:∈(x, y::UnitRange{T} where T<:DiscreteTypes) false  # false prevents defining 
-@register Base.:∈(x, y::AbstractVector{T} where T<:DiscreteTypes) false
-@register Base.:∈(x, y::Vector{T} where T<:DiscreteTypes) false
-@register Base.:∈(x, y::Tuple) false
+@register_symbolic Base.:∈(x::Num, y::AbstractRange{T} where T<:DiscreteTypes) false
+@register_symbolic Base.:∈(x::Num, y::UnitRange{T} where T<:DiscreteTypes) false  # false prevents defining overloads
+@register_symbolic Base.:∈(x::Num, y::AbstractVector{T} where T<:DiscreteTypes) false
+@register_symbolic Base.:∈(x::Num, y::Vector{T} where T<:DiscreteTypes) false
+@register_symbolic Base.:∈(x::Num, y::Tuple) false
 
 # TODO: Varargs ∨
 

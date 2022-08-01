@@ -34,7 +34,8 @@ function solve(p::SATProblem; solver=cryptominisat)
     input = "_input.cnf"
     write(input, s)
 
-    return @time call_solver(solver, input=input)
+    # return @time call_solver(solver, input=input)
+    return call_solver(solver, input=input)
 end
 
 abstract type AbstractSATSolver end

@@ -9,9 +9,14 @@ struct DiscreteVariable{N,D,B,M} <: Var
     varmap::M  # forward dictionary from domain to variables
 end
 
+name(v::DiscreteVariable) = v.name
+domain(v::DiscreteVariable) = v.domain
+booleans(v::DiscreteVariable) = v.booleans
+
 # Base.show(io::IO, x::DiscreteVariable) = print(io, "Variable $(x.name) ∈ $(x.domain)")
 Base.show(io::IO, x::DiscreteVariable) = print(io, "variable $(x.name)")
 
+Base.getindex(v::DiscreteVariable, i) = v.varmap[i]
 
 DiscreteVariable(name, D) = DiscreteVariable(name, sort(collect(D)))
 
@@ -19,8 +24,9 @@ DiscreteVariable(name, D) = DiscreteVariable(name, sort(collect(D)))
 indices(v::Vector{Int}) = v
 indices(v) = collect(eachindex(v))
 
+
 function DiscreteVariable(name, domain::Vector)
-    booleans = [Variable(name, i) for i ∈ indices(domain)]
+    booleans = [Symbolics.variable(name, i) for i ∈ indices(domain)]
     varmap = Dict(i => v for (i, v) in zip(domain, booleans))
 
     return DiscreteVariable(name, domain, booleans, varmap)
@@ -46,16 +52,16 @@ function exactly_one(vars)
     return clauses
 end
 
-clauses(x::DiscreteVariable) = exactly_one(x.booleans)
+clauses(x::DiscreteVariable) = exactly_one(booleans(x))
    
 
-domain(x::Var) = x.domain
+# domain(x::Var) = x.domain
 # vars(x::DiscreteVariable) = [x]
 
 
 
 function decode(varmap, x::Var)
-    values = [varmap[v] for v in x.booleans]
+    values = [varmap[v] for v in booleans(x)]
 
     num_true = count(values)
 
@@ -63,6 +69,7 @@ function decode(varmap, x::Var)
         error("Variable $x has not been successfully solved: values $(x.vars .=> values)")
     end
 
-    return x.domain[findfirst(values)]
+    which = findfirst(values)  # find first (and only) one which is true
+    return x.domain[which]  # map it back to the domain
 end
 

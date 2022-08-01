@@ -13,7 +13,7 @@ using Symbolics: Sym
     end
 
     function make_matrix(name, m, n)
-        return [Num(Sym{Real}(name, i, j)) for i in 1:m, j in 1:n]
+        return [Symbolics.variable(name, i, j) for i in 1:m, j in 1:n]
     end
 
     n = 9
