@@ -9,11 +9,18 @@
 
 const DiscreteTypes = Union{Integer, Symbol}
 
-@register_symbolic Base.:∈(x::Num, y::AbstractRange{T} where T<:DiscreteTypes) false
-@register_symbolic Base.:∈(x::Num, y::UnitRange{T} where T<:DiscreteTypes) false  # false prevents defining overloads
-@register_symbolic Base.:∈(x::Num, y::AbstractVector{T} where T<:DiscreteTypes) false
-@register_symbolic Base.:∈(x::Num, y::Vector{T} where T<:DiscreteTypes) false
-@register_symbolic Base.:∈(x::Num, y::Tuple) false
+# @register_symbolic Base.:∈(x::Real, y::AbstractRange{T} where T<:DiscreteTypes) false
+# @register_symbolic Base.:∈(x::Real, y::UnitRange{T} where T<:DiscreteTypes) false  # false prevents defining overloads
+# @register_symbolic Base.:∈(x::Real, y::AbstractVector{T} where T<:DiscreteTypes) false
+# @register_symbolic Base.:∈(x::Real, y::Vector{T} where T<:DiscreteTypes) false
+# @register_symbolic Base.:∈(x::Real, y::Tuple) false
+
+@register_symbolic Base.:∈(x::Real, y::UnitRange) false  # false prevents defining overloads
+
+@register_symbolic Base.:∈(x::Real, y::Vector{Symbol}) false  # false prevents defining overloads
+@register_symbolic Base.:∈(x::Real, y::Vector{Int}) false  # false prevents defining overloads
+
+# @register_symbolic Base.:∈(x, y) false  # false prevents defining overloads
 
 # TODO: Varargs ∨
 
@@ -24,4 +31,3 @@ const DiscreteTypes = Union{Integer, Symbol}
 ∨(x...) = foldl(∨, x)
 # ∨(x...) = Symbolics.Term(∨, [x...])
 ∧(x...) = foldl(∧, x)
-
