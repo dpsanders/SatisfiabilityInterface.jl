@@ -5,6 +5,9 @@ using Test
     include("basic.jl")
     include("graph_colouring.jl")
     include("sudoku.jl")
+    include("N_queens.jl")
+    
     include("MOI_wrapper.jl")
     include("JuMP.jl")
+
 end
