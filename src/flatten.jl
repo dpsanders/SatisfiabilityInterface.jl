@@ -68,5 +68,5 @@ function flatten_expression(ex)
 end
 
 "Flatten a nested expression to a chain of unary or binary operations"
-flatten_expression(ex::Num) = cse(Symbolics.value(ex))
+flatten_expression(ex::Num) = flatten_expression(value(ex))
 

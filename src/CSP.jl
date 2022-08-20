@@ -49,13 +49,13 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
     for constraint in prob.constraints 
         constraint = value(constraint)
 
-        # # @show constraint
+        # @show constraint
 
         if constraint isa Equation 
 
             lhs = constraint.lhs
 
-            # # @show lhs 
+            # @show lhs 
 
             op, new_args = parse_expression(varmap, constraint.rhs)   # makes a BinaryNode
 

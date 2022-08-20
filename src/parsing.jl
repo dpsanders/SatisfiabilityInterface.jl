@@ -51,6 +51,9 @@ is_variable(ex) = !istree(ex) || (operation(ex) == getindex)
 
 function process(constraint)
 
+    # println("\nprocess")
+    # @show constraint
+
     new_constraints = []
 
     constraint2 = value(constraint)
@@ -60,6 +63,10 @@ function process(constraint)
 
     lhs = args[1]
     rhs = args[2]
+
+    # @show op
+    # @show lhs 
+    # @show rhs
 
     intermediates_generated = false
 
@@ -79,8 +86,15 @@ function process(constraint)
 
     end
 
-    push!(new_constraints, op(lhs, rhs))
+    if op ∈ (==, <=, <, >=, >, !=)   # an actual constraint
+        push!(new_constraints, op(lhs, rhs))
+    
+    else
+        val = make_variable()        # defines a new variable
+        push!(new_constraints, val ~ op(lhs, rhs))
+    end
 
+    @show new_constraints
     return new_constraints
 
 end
@@ -96,7 +110,23 @@ function parse_constraint!(domains, ex::Equation)   # ~ produces an Equation
    lhs = Num(ex.lhs)
    rhs = Num(ex.rhs)
    
+#    @show lhs
+#    @show rhs 
+#    @show typeof(rhs)
+
    new_constraints = process(rhs)
+
+@show new_constraints
+
+    last = pop!(new_constraints)   # remove last constraint to rename its lhs variable 
+
+    push!(new_constraints, lhs ~ last.rhs)
+
+
+
+   return domains, new_constraints
+
+   
 
 
 end
@@ -137,7 +167,7 @@ function parse_constraints(constraints)
     for constraint in constraints
 
         # binarize constraints: 
-        domains, new_constraints = parse_constraint!(domains, value(constraint))
+        domains, new_constraints = parse_constraint!(domains, constraint)
 
         for statement in new_constraints 
             if statement isa Equation 
