@@ -64,7 +64,7 @@ end
 function flatten_expression(ex) 
     dict, final = cse(ex) 
 
-    return [Assignment(rhs, lhs) for (lhs, rhs) in pairs(dict)], final
+    return [Equation(rhs, lhs) for (lhs, rhs) in pairs(dict)], final
 end
 
 "Flatten a nested expression to a chain of unary or binary operations"

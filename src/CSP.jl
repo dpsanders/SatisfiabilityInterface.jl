@@ -51,7 +51,7 @@ function DiscreteCSP(prob::ConstraintSatisfactionProblem)
 
         # # @show constraint
 
-        if constraint isa Assignment 
+        if constraint isa Equation 
 
             lhs = constraint.lhs
 

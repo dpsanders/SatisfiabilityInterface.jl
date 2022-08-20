@@ -140,7 +140,7 @@ function parse_constraints(constraints)
         domains, new_constraints = parse_constraint!(domains, value(constraint))
 
         for statement in new_constraints 
-            if statement isa Assignment 
+            if statement isa Equation 
                 push!(additional_vars, statement.lhs)
             end
         end

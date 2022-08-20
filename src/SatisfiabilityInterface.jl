@@ -2,7 +2,7 @@ module SatisfiabilityInterface
 
 using Symbolics
 using Symbolics: variable, Sym
-using Symbolics: Assignment, get_variables, operation, arguments, value, istree
+using Symbolics: Equation, get_variables, operation, arguments, value, istree
 using CryptoMiniSat_jll
 using OrderedCollections: OrderedDict
 

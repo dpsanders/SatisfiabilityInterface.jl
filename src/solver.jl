@@ -89,7 +89,7 @@ end
 
 
 """
-Check that the clause is satisfied by the assignments
+Check that the clause is satisfied by the Equations
 in `results`
 """
 function satisfies(clause::Vector{Int}, results)
@@ -98,7 +98,7 @@ end
 
 """
 Check that all clases in `p` are satisfied by the
-assignments in `results`
+Equations in `results`
 """
 function satisfies(p, results)
     return all(satisfies.(p.clauses, Ref(results)))
