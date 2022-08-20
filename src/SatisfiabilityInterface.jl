@@ -4,7 +4,7 @@ using Symbolics
 using Symbolics: variable, Sym
 using Symbolics: Assignment, get_variables, operation, arguments, value, istree
 using CryptoMiniSat_jll
-using ReversePropagation
+using OrderedCollections: OrderedDict
 
 export DiscreteVariable, ConstraintSatisfactionProblem, DiscreteCSP, SymbolicSATProblem, SATProblem
 export read_cnf, SATProblem
@@ -25,6 +25,7 @@ include("symbolic_problem.jl")
 include("MOI_wrapper.jl")
 include("read_cnf.jl")
 include("solver.jl")
+include("flatten.jl")
 include("parsing.jl")
 
 include("relations.jl")

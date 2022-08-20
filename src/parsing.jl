@@ -64,7 +64,7 @@ function process(constraint)
     intermediates_generated = false
 
     if !is_variable(lhs)
-        lhs = ReversePropagation.cse_equations(lhs)
+        lhs = flatten_expression(lhs)
 
         append!(new_constraints, lhs[1])
         lhs = lhs[2]
@@ -72,15 +72,13 @@ function process(constraint)
     end
 
     if !is_variable(rhs)
-        rhs = ReversePropagation.cse_equations(rhs)
+        rhs = flatten_expression(rhs)
 
         append!(new_constraints, rhs[1])
         rhs = rhs[2]
 
     end
 
-    # # @show new_constraints
-    # # @show op, lhs, rhs
     push!(new_constraints, op(lhs, rhs))
 
     return new_constraints
@@ -92,6 +90,16 @@ process(constraints::Vector) = reduce(vcat, process(constraint) for constraint i
     
 
 
+
+
+function parse_constraint!(domains, ex::Equation)   # ~ produces an Equation
+   lhs = Num(ex.lhs)
+   rhs = Num(ex.rhs)
+   
+   new_constraints = process(rhs)
+
+
+end
 
 function parse_constraint!(domains, ex)
 
@@ -111,11 +119,7 @@ function parse_constraint!(domains, ex)
 
     else
         new_constraints = process(expr)
-        
-        # println()
-        # # @show expr
-        # # @show new_constraints
-
+     
     end
 
     return domains, new_constraints
